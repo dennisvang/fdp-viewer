@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <title>FDP client</title>
     <script src="https://unpkg.com/n3/browser/n3.min.js"></script>
-    <script src="fdp-parser.js"></script>
+    <script src="fdp-parser.js" type="module"></script>
 </head>
 <body>
-
+<form>
+    <label>
+        fdp url:
+        <input type="text" value="https://app.fairdatapoint.org/" placeholder="http://localhost" id="url">
+    </label>
+</form>
 </body>
 </html>
