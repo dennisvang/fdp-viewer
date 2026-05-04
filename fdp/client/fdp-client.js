@@ -59,6 +59,7 @@ function createElementTerm(term) {
         termElement.target = "_blank";
         termElement.textContent = createLabelForIRI(term.id);
     }
+    termElement.classList.add("rdf-term");
     return termElement;
 }
 

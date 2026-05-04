@@ -1,3 +1,7 @@
+.rdf-term {
+    margin: 0.5em;
+}
+
 .subject .rdf-subject {
     display: none;
 }
