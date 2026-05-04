@@ -1,5 +1,11 @@
 .rdf-term {
-    margin: 0.5em;
+    margin: 0.25em;
+}
+
+.subject {
+    padding: 0.5em;
+    background-color: skyblue;
+    border-radius: 0.5em;
 }
 
 .subject .rdf-subject {
@@ -8,4 +14,9 @@
 
 .subject-title {
     font-weight: bold;
+}
+
+#statements {
+    display: grid;
+    grid-gap: 0.5em;
 }
