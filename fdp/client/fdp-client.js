@@ -39,9 +39,7 @@ function createElementIRI(iri, ...classes) {
 
 function createElementTerm(term) {
     // creates an html element to represent an rdf term
-    console.log(term.termType);
     let termElement;
-    console.log(term.id.toString());
     if (term.termType === "Literal") {
         termElement = document.createElement("span");
         termElement.textContent = withPrefixes(term.id);
