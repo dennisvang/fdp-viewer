@@ -60,7 +60,6 @@ function createElementStatement(quad) {
         const element = createElementTerm(quad[termName]);
         element.classList.add("rdf-" + termName);
         statement.appendChild(element);
-        statement.appendChild(document.createTextNode(", "));
     }
     return statement;
 }
