@@ -9,22 +9,32 @@ const ttl = await getTurtle(url);
 console.log(ttl);
 const store = new N3.Store();
 parseFromUrl(url, 1).then(populate);
-const prefixes = {};
+const prefixes = {"this-fdp": url};
+
+function createLabelForIRI(iri) {
+    // creates a simplified label for the iri
+    // todo: use actual label from rdf class/property definition
+    let label = `<${iri}>`;
+    for (const [prefix, prefixIRI] of Object.entries(prefixes)) {
+        if (iri.includes(prefixIRI)) {
+            label = iri.replace(prefixIRI, prefix);
+        }
+    }
+    return label;
+}
 
 function createElementTerm(term) {
     // creates an html element to represent an rdf term
-    // todo: use actual rdf label
     console.log(term.termType);
     let termElement;
-    const label = term.id.replace(url, "fdp");
     console.log(term.id.toString());
     if (term.termType === "Literal") {
         termElement = document.createElement("span");
-        termElement.textContent = label;
+        termElement.textContent = term.id;
     } else {
         termElement = document.createElement("a");
         termElement.href = term.id;
-        termElement.textContent = `<${label}>`;
+        termElement.textContent = createLabelForIRI(term.id);
     }
     return termElement;
 }
@@ -36,7 +46,7 @@ function createElementStatement(quad) {
         const element = createElementTerm(quad[termName]);
         element.classList.add(termName);
         statement.appendChild(element);
-        statement.appendChild(document.createTextNode(","));
+        statement.appendChild(document.createTextNode(", "));
     }
     return statement;
 }
@@ -64,6 +74,7 @@ async function parseFromUrl(url, maxDepth, depth) {
             }
         },
         onPrefix: (prefix, iri) => {
+            console.log(prefix);
             prefixes[prefix] = iri;
             if (depth < maxDepth) {
                 console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
