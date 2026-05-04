@@ -12,6 +12,23 @@ const prefixes = {
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
 
+function getLabel(iri) {
+    // try to get a human readable label for an iri
+    // default to prefix substitution
+    let label = withPrefixes(iri);
+    // try to get actual label for iri
+    const objects = store.getObjects(iri, "http://www.w3.org/2000/01/rdf-schema#label");
+    if (objects.length) {
+        // todo: handle multiple labels...
+        label = objects[0].id;
+    }
+    // if all else fails, fall back on iri representation
+    if (label === iri) {
+        label = `<${iri}>`;
+    }
+    return label;
+}
+
 function withPrefixes(value) {
     // replaces iris with corresponding prefixes
     for (const [prefix, prefixIRI] of Object.entries(prefixes)) {
@@ -30,15 +47,10 @@ function createElementTitle(iri) {
 
 function createElementIRI(iri, ...classes) {
     // creates a clickable html element for iri, with simplified label
-    // todo: use actual label from rdf class/property definition
-    let label = withPrefixes(iri);
-    if (label === iri) {
-        label = `<${iri}>`;
-    }
     const iriElement = document.createElement("a");
     iriElement.href = iri;
     iriElement.target = "_blank";
-    iriElement.textContent = label;
+    iriElement.textContent = getLabel(iri);
     if (classes && classes.length) {
         iriElement.classList.add(classes);
     }
