@@ -52,6 +52,8 @@ function createElementTerm(term) {
 }
 
 function createElementStatement(quad) {
+    // creates an html element containing a single rdf statement
+    // consisting of rdf terms <subject> <predicate> <object>
     let statement = document.createElement("div");
     statement.classList.add("statement");
     for (const termName of ["subject", "predicate", "object"]) {
