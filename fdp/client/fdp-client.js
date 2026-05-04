@@ -73,13 +73,13 @@ function createElementStatement(quad) {
 
 function createElementSubject(subject) {
     // creates an html element containing all rdf statements for the given rdf subject
-    console.log(`createElementSubject() called for ${subject.id}`);
+    console.debug(`createElementSubject() called for ${subject.id}`);
     const subjectElement = document.createElement("div");
     subjectElement.classList.add("subject");
     subjectElement.id = subject.id;
     subjectElement.appendChild(createElementTitle(subject.id));
     for (const quad of store.match(subject)) {
-        console.log(quad);
+        console.debug(quad);
         subjectElement.appendChild(createElementStatement(quad));
     }
     return subjectElement;
@@ -87,8 +87,8 @@ function createElementSubject(subject) {
 
 export async function populate(containerElement) {
     // populates the html page with rdf statements from the store
-    console.log("populate() called");
-    console.log(prefixes);
+    console.debug("populate() called");
+    console.debug(prefixes);
     store.forSubjects(subject => {
         containerElement.appendChild(createElementSubject(subject));
     });
@@ -108,7 +108,7 @@ export async function parseFromUrl(url, maxDepth, depth) {
             }
         },
         onPrefix: (prefix, iri) => {
-            console.log(prefix);
+            console.debug(prefix);
             prefixes[prefix] = iri.id;
             if (depth < maxDepth) {
                 console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
@@ -138,6 +138,6 @@ async function makeRequest(url, options) {
         }
         return await response.text();
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 }
