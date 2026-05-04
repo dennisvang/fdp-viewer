@@ -1,3 +1,7 @@
 .subject .rdf-subject {
     display: none;
 }
+
+.subject-title {
+    font-weight: bold;
+}
