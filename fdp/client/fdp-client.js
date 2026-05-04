@@ -55,14 +55,14 @@ function createElementTerm(term) {
 function createElementStatement(quad) {
     // creates an html element containing a single rdf statement
     // consisting of rdf terms <subject> <predicate> <object>
-    let statement = document.createElement("div");
-    statement.classList.add("rdf-statement");
+    let statementElement = document.createElement("div");
+    statementElement.classList.add("rdf-statement");
     for (const termName of ["subject", "predicate", "object"]) {
         const element = createElementTerm(quad[termName]);
         element.classList.add("rdf-" + termName);
-        statement.appendChild(element);
+        statementElement.appendChild(element);
     }
-    return statement;
+    return statementElement;
 }
 
 function createElementSubject(subject) {
