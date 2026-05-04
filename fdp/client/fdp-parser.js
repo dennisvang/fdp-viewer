@@ -45,6 +45,7 @@ function createElementTerm(term) {
     } else {
         termElement = document.createElement("a");
         termElement.href = term.id;
+        termElement.target = "_blank";
         termElement.textContent = createLabelForIRI(term.id);
     }
     return termElement;
