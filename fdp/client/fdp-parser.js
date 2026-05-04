@@ -16,14 +16,20 @@ const prefixes = {
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
 
+function withPrefixes(value) {
+    // replaces iris with corresponding prefixes
+    for (const [prefix, prefixIRI] of Object.entries(prefixes)) {
+        value = value.replace(prefixIRI, prefix + ":");
+    }
+    return value;
+}
+
 function createLabelForIRI(iri) {
     // creates a simplified label for the iri
     // todo: use actual label from rdf class/property definition
-    let label = `<${iri}>`;
-    for (const [prefix, prefixIRI] of Object.entries(prefixes)) {
-        if (iri.includes(prefixIRI)) {
-            label = iri.replace(prefixIRI, prefix + ":");
-        }
+    let label = withPrefixes(iri);
+    if (label === iri) {
+        label = `<${iri}>`;
     }
     return label;
 }
