@@ -14,18 +14,18 @@ function createElementTerm(term) {
     // creates an html element to represent an rdf term
     // todo: use actual rdf label
     console.log(term.termType);
-    let label;
+    let termElement;
     const termId = term.id.replace(url, "fdp");
     console.log(term.id.toString());
     if (term.termType === "Literal") {
-        label = document.createElement("span");
-        label.textContent = termId;
+        termElement = document.createElement("span");
+        termElement.textContent = termId;
     } else {
-        label = document.createElement("a");
-        label.href = term.id;
-        label.textContent = `<${termId}>`;
+        termElement = document.createElement("a");
+        termElement.href = term.id;
+        termElement.textContent = `<${termId}>`;
     }
-    return label;
+    return termElement;
 }
 
 function createElementStatement(quad) {
