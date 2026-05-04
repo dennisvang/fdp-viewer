@@ -65,14 +65,23 @@ function createElementStatement(quad) {
     return statement;
 }
 
+function createElementSubject(subject) {
+    // creates an html element containing all rdf statements for the given rdf subject
+    console.log(`createElementSubject() called for ${subject.id}`);
+    const subjectElement = document.createElement("div");
+    subjectElement.classList.add("subject");
+    for (const quad of store.match(subject)) {
+        console.log(quad);
+        subjectElement.appendChild(createElementStatement(quad));
+    }
+    divStatements.appendChild(subjectElement);
+}
+
 async function populate() {
     // populates the html page with rdf statements from the store
     console.log("populate() called");
     console.log(prefixes);
-    for (const quad of store) {
-        console.log(quad);
-        divStatements.appendChild(createElementStatement(quad));
-    }
+    store.forSubjects(createElementSubject);
 }
 
 async function parseFromUrl(url, maxDepth, depth) {
