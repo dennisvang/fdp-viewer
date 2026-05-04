@@ -9,6 +9,7 @@ const ttl = await getTurtle(url);
 console.log(ttl);
 const store = new N3.Store();
 parseFromUrl(url, 1).then(populate);
+const prefixes = {};
 
 function createElementTerm(term) {
     // creates an html element to represent an rdf term
@@ -63,6 +64,7 @@ async function parseFromUrl(url, maxDepth, depth) {
             }
         },
         onPrefix: (prefix, iri) => {
+            prefixes[prefix] = iri;
             if (depth < maxDepth) {
                 console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
                 parseFromUrl(iri.id, maxDepth, depth + 1);
