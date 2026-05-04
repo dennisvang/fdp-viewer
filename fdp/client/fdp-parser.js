@@ -41,7 +41,7 @@ function createElementTerm(term) {
     console.log(term.id.toString());
     if (term.termType === "Literal") {
         termElement = document.createElement("span");
-        termElement.textContent = term.id;
+        termElement.textContent = withPrefixes(term.id);
     } else {
         termElement = document.createElement("a");
         termElement.href = term.id;
