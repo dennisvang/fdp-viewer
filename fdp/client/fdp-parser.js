@@ -10,7 +10,7 @@ console.log(ttl);
 const store = new N3.Store();
 parseFromUrl(url, 1).then(populate);
 
-function createTermElement(term) {
+function createElementTerm(term) {
     // creates an html element to represent an rdf term
     // todo: use actual rdf label
     console.log(term.termType);
@@ -32,7 +32,7 @@ function createElementStatement(quad) {
     let statement = document.createElement("div");
     statement.classList.add("statement");
     for (const termName of ["subject", "predicate", "object"]) {
-        const element = createTermElement(quad[termName]);
+        const element = createElementTerm(quad[termName]);
         element.classList.add(termName);
         statement.appendChild(element);
         statement.appendChild(document.createTextNode(","));
