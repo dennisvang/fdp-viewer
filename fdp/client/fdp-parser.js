@@ -34,6 +34,17 @@ function createLabelForIRI(iri) {
     return label;
 }
 
+function createElementText(text, ...classes) {
+    // creates an html span element for simple text display
+    // any additional arguments are interpreted as css classes
+    const textElement = document.createElement("span");
+    textElement.textContent = text;
+    if (classes && classes.length) {
+        textElement.classList.add(classes);
+    }
+    return textElement;
+}
+
 function createElementTerm(term) {
     // creates an html element to represent an rdf term
     console.log(term.termType);
