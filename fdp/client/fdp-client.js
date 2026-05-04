@@ -24,25 +24,21 @@ function withPrefixes(value) {
     return value;
 }
 
-function createLabelForIRI(iri) {
-    // creates a simplified label for the iri
+function createElementIRI(iri, ...classes) {
+    // creates a clickable html element for iri, with simplified label
     // todo: use actual label from rdf class/property definition
     let label = withPrefixes(iri);
     if (label === iri) {
         label = `<${iri}>`;
     }
-    return label;
-}
-
-function createElementText(text, ...classes) {
-    // creates an html span element for simple text display
-    // any additional arguments are interpreted as css classes
-    const textElement = document.createElement("span");
-    textElement.textContent = text;
+    const iriElement = document.createElement("a");
+    iriElement.href = iri;
+    iriElement.target = "_blank";
+    iriElement.textContent = label;
     if (classes && classes.length) {
-        textElement.classList.add(classes);
+        iriElement.classList.add(classes);
     }
-    return textElement;
+    return iriElement;
 }
 
 function createElementTerm(term) {
@@ -54,10 +50,7 @@ function createElementTerm(term) {
         termElement = document.createElement("span");
         termElement.textContent = withPrefixes(term.id);
     } else {
-        termElement = document.createElement("a");
-        termElement.href = term.id;
-        termElement.target = "_blank";
-        termElement.textContent = createLabelForIRI(term.id);
+        termElement = createElementIRI(term.id);
     }
     termElement.classList.add("rdf-term");
     return termElement;
@@ -82,7 +75,7 @@ function createElementSubject(subject) {
     const subjectElement = document.createElement("div");
     subjectElement.classList.add("subject");
     subjectElement.id = subject.id;
-    subjectElement.appendChild(createElementText(createLabelForIRI(subject.id), "subject-title"));
+    subjectElement.appendChild(createElementIRI(subject.id, "subject-title"));
     for (const quad of store.match(subject)) {
         console.log(quad);
         subjectElement.appendChild(createElementStatement(quad));
