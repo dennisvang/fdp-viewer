@@ -9,7 +9,7 @@ const ttl = await getTurtle(url);
 console.log(ttl);
 const store = new N3.Store();
 parseFromUrl(url, 1).then(populate);
-const prefixes = {"this-fdp": url};
+const prefixes = {"fdp": url};
 
 function createLabelForIRI(iri) {
     // creates a simplified label for the iri
@@ -17,7 +17,7 @@ function createLabelForIRI(iri) {
     let label = `<${iri}>`;
     for (const [prefix, prefixIRI] of Object.entries(prefixes)) {
         if (iri.includes(prefixIRI)) {
-            label = iri.replace(prefixIRI, prefix);
+            label = iri.replace(prefixIRI, prefix + ":");
         }
     }
     return label;
@@ -54,6 +54,7 @@ function createElementStatement(quad) {
 async function populate() {
     // populates the html page with rdf statements from the store
     console.log("populate() called");
+    console.log(prefixes);
     for (const quad of store) {
         console.log(quad);
         divStatements.appendChild(createElementStatement(quad));
@@ -75,7 +76,7 @@ async function parseFromUrl(url, maxDepth, depth) {
         },
         onPrefix: (prefix, iri) => {
             console.log(prefix);
-            prefixes[prefix] = iri;
+            prefixes[prefix] = iri.id;
             if (depth < maxDepth) {
                 console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
                 parseFromUrl(iri.id, maxDepth, depth + 1);
