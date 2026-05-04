@@ -9,7 +9,12 @@ const ttl = await getTurtle(url);
 console.log(ttl);
 const store = new N3.Store();
 parseFromUrl(url, 1).then(populate);
-const prefixes = {"fdp": url};
+const prefixes = {
+    "fdp": url,
+    "fdp-o": "https://w3id.org/fdp/fdp-o#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+};
 
 function createLabelForIRI(iri) {
     // creates a simplified label for the iri
