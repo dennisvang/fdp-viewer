@@ -1,6 +1,8 @@
 // https://github.com/rdfjs/N3.js/
 // use <script type="module" ...> to ensure page is loaded (instead of load event)
 
+import "https://unpkg.com/n3/browser/n3.min.js";
+
 const parser = new N3.Parser();
 const store = new N3.Store();
 const prefixes = {
