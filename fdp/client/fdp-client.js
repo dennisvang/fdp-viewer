@@ -1,9 +1,7 @@
 // https://github.com/rdfjs/N3.js/
 // use <script type="module" ...> to ensure page is loaded (instead of load event)
 
-const divStatements = document.querySelector('#statements');
 const parser = new N3.Parser();
-const url = document.querySelector("#url").value;
 const store = new N3.Store();
 const prefixes = {
     "fdp": url,
@@ -11,9 +9,6 @@ const prefixes = {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
-
-// main call
-parseFromUrl(url, 1).then(populate);
 
 function withPrefixes(value) {
     // replaces iris with corresponding prefixes
@@ -79,17 +74,19 @@ function createElementSubject(subject) {
         console.log(quad);
         subjectElement.appendChild(createElementStatement(quad));
     }
-    divStatements.appendChild(subjectElement);
+    return subjectElement;
 }
 
-async function populate() {
+export async function populate(containerElement) {
     // populates the html page with rdf statements from the store
     console.log("populate() called");
     console.log(prefixes);
-    store.forSubjects(createElementSubject);
+    store.forSubjects(subject => {
+        containerElement.appendChild(createElementSubject(subject));
+    });
 }
 
-async function parseFromUrl(url, maxDepth, depth) {
+export async function parseFromUrl(url, maxDepth, depth) {
     // gets rdf-turtle text from url and parses it into the store
     // recursively parses prefix urls up to specified depth
     if (depth === undefined) {

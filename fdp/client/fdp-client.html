@@ -14,6 +14,17 @@
         <input type="text" value="https://app.fairdatapoint.org/" placeholder="http://localhost" id="url">
     </label>
 </form>
-<div id="statements"></div>
+<div class="container"></div>
+
+<script type="module">
+    import { parseFromUrl, populate } from "./fdp-client.js";
+
+    const url = document.querySelector("#url").value;
+    const container = document.querySelector('.container');
+
+    // main call
+    parseFromUrl(url, 1).then(() => populate(container));
+</script>
+
 </body>
 </html>

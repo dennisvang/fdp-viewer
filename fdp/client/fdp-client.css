@@ -1,3 +1,8 @@
+.container {
+    display: grid;
+    grid-gap: 0.5em;
+}
+
 .rdf-term {
     margin: 0.25em;
 }
@@ -14,9 +19,4 @@
 
 .subject-title {
     font-weight: bold;
-}
-
-#statements {
-    display: grid;
-    grid-gap: 0.5em;
 }
