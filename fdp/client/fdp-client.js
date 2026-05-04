@@ -4,17 +4,16 @@
 const divStatements = document.querySelector('#statements');
 const parser = new N3.Parser();
 const url = document.querySelector("#url").value;
-console.log(url);
-const ttl = await getTurtle(url);
-console.log(ttl);
 const store = new N3.Store();
-parseFromUrl(url, 1).then(populate);
 const prefixes = {
     "fdp": url,
     "fdp-o": "https://w3id.org/fdp/fdp-o#",
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
+
+// main call
+parseFromUrl(url, 1).then(populate);
 
 function withPrefixes(value) {
     // replaces iris with corresponding prefixes
