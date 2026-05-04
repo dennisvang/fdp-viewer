@@ -16,15 +16,15 @@ function createElementTerm(term) {
     // todo: use actual rdf label
     console.log(term.termType);
     let termElement;
-    const termId = term.id.replace(url, "fdp");
+    const label = term.id.replace(url, "fdp");
     console.log(term.id.toString());
     if (term.termType === "Literal") {
         termElement = document.createElement("span");
-        termElement.textContent = termId;
+        termElement.textContent = label;
     } else {
         termElement = document.createElement("a");
         termElement.href = term.id;
-        termElement.textContent = `<${termId}>`;
+        termElement.textContent = `<${label}>`;
     }
     return termElement;
 }
