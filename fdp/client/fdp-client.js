@@ -20,6 +20,14 @@ function withPrefixes(value) {
     return value;
 }
 
+function createElementTitle(iri) {
+    // creates an html element for fancy clickable title
+    const titleElement = document.createElement("div");
+    titleElement.classList.add("title");
+    titleElement.appendChild(createElementIRI(iri, "subject-title"));
+    return titleElement;
+}
+
 function createElementIRI(iri, ...classes) {
     // creates a clickable html element for iri, with simplified label
     // todo: use actual label from rdf class/property definition
@@ -69,7 +77,7 @@ function createElementSubject(subject) {
     const subjectElement = document.createElement("div");
     subjectElement.classList.add("subject");
     subjectElement.id = subject.id;
-    subjectElement.appendChild(createElementIRI(subject.id, "subject-title"));
+    subjectElement.appendChild(createElementTitle(subject.id));
     for (const quad of store.match(subject)) {
         console.log(quad);
         subjectElement.appendChild(createElementStatement(quad));
