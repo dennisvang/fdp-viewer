@@ -28,20 +28,24 @@ function createTermElement(term) {
     return label;
 }
 
+function createElementStatement(quad) {
+    let statement = document.createElement("div");
+    statement.classList.add("statement");
+    for (const termName of ["subject", "predicate", "object"]) {
+        const element = createTermElement(quad[termName]);
+        element.classList.add(termName);
+        statement.appendChild(element);
+        statement.appendChild(document.createTextNode(","));
+    }
+    return statement;
+}
+
 async function populate() {
     // populates the html page with rdf statements from the store
     console.log("populate() called");
     for (const quad of store) {
         console.log(quad);
-        let statement = document.createElement("div");
-        statement.classList.add("statement");
-        for (const termName of ["subject", "predicate", "object"]) {
-            const element = createTermElement(quad[termName]);
-            element.classList.add(termName);
-            statement.appendChild(element);
-            statement.appendChild(document.createTextNode(","));
-        }
-        divStatements.appendChild(statement);
+        divStatements.appendChild(createElementStatement(quad));
     }
 }
 
