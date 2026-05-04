@@ -50,6 +50,8 @@ async function populate() {
 }
 
 async function parseFromUrl(url, maxDepth, depth) {
+    // gets rdf-turtle text from url and parses it into the store
+    // recursively parses prefix urls up to specified depth
     if (depth === undefined) {
         depth = 0;
     }
