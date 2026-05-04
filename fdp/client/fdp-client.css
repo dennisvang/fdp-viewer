@@ -3,6 +3,10 @@
     grid-gap: 0.5em;
 }
 
+.rdf-statement {
+    margin: 0.25em;
+}
+
 .rdf-term {
     margin: 0.25em;
 }
