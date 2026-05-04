@@ -80,6 +80,8 @@ function createElementSubject(subject) {
     console.log(`createElementSubject() called for ${subject.id}`);
     const subjectElement = document.createElement("div");
     subjectElement.classList.add("subject");
+    subjectElement.id = subject.id;
+    subjectElement.appendChild(createElementText(createLabelForIRI(subject.id), "subject-title"));
     for (const quad of store.match(subject)) {
         console.log(quad);
         subjectElement.appendChild(createElementStatement(quad));
