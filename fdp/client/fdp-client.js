@@ -148,6 +148,7 @@ async function makeRequest(url, options) {
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
+        console.debug("got success response from " + url);
         return await response.text();
     } catch (error) {
         console.error(error);
