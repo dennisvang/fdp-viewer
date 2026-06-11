@@ -123,6 +123,7 @@ export async function parseFromUrl(url, maxDepth, depth) {
         onQuad: (err, quad) => {
             if (quad !== null) {
                 store.add(quad);
+                console.debug("added to store: " + quad.subject.id)
             }
         },
         onPrefix: (prefix, iri) => {
