@@ -157,8 +157,12 @@ async function makeRequest(url, options) {
         console.warn(`using cors workaround for ${url} (${finalUrl})`);
     }
 
+    // enforce https
+    finalUrl = finalUrl.replace("http://", "https://");
+
     // generic fetch request with error handling
     try {
+        console.debug("fetching " + finalUrl);
         const response = await fetch(finalUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
