@@ -35,9 +35,14 @@ async function parseFromUrl(url) {
     const ttl = await makeRequest(url);
     parser.parse(ttl, {
         onQuad: (err, quad) => {
-            if (quad !== null) {
-                store.add(quad);
-                // console.debug("added to store: " + quad.subject.id)
+            try {
+                if (quad !== null) {
+                    store.add(quad);
+                    console.debug("added to store: " + quad.subject.id)
+                }
+            } catch (error) {
+                console.warn("parser failed for " + url);
+                console.warn(error);
             }
         },
         onPrefix: (prefix, iri) => {
