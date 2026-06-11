@@ -3,6 +3,7 @@
 
 import "https://unpkg.com/n3/browser/n3.min.js";
 
+const namedNode = N3.DataFactory.namedNode;
 const parser = new N3.Parser();
 const store = new N3.Store();
 const prefixes = {
@@ -118,7 +119,16 @@ export async function populate(containerElement) {
     console.debug(prefixes);
     store.forSubjects(subject => {
         containerElement.appendChild(createElementSubject(subject));
+        console.log(subject);
     });
+
+    // TODO: why are ontologies not added to the store? the following queries should
+    //  yield the same result due to inference, because fdp-o:metadataIssued is a
+    //  subproperty of dcterms:date
+    console.log("get subjects:");
+    console.log(store.getSubjects(namedNode("https://w3id.org/fdp/fdp-o#metadataIssued"), null, null));
+    console.log(store.getSubjects(namedNode("http://purl.org/dc/terms/date"), null, null));
+
 }
 
 export async function parseFromUrl(url, maxDepth, depth) {
