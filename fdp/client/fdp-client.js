@@ -17,7 +17,14 @@ const mediatypeTextTurtle = 'text/turtle';
 // workaround for CORS restrictions on purl resources
 // (redirects and CORS prevent download via purl, so we use the actual url instead)
 const corsMap = {
-    "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl"
+    "http://purl.org/dc/terms/": {
+        "url": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
+        "accept": undefined,
+    },
+    "http://www.w3.org/2001/XMLSchema#": {
+        "url": undefined,
+        "accept": "application/xml",
+    }
 };
 
 function getLabel(iri) {
@@ -125,7 +132,7 @@ export async function parseFromUrl(url, maxDepth, depth) {
         onQuad: (err, quad) => {
             if (quad !== null) {
                 store.add(quad);
-                console.debug("added to store: " + quad.subject.id)
+                // console.debug("added to store: " + quad.subject.id)
             }
         },
         onPrefix: (prefix, iri) => {
@@ -155,8 +162,12 @@ async function makeRequest(url, options) {
     // (see https://github.com/fdp-specs/fdp-specs.github.io/issues/35 for details)
     let finalUrl = url;
     if (url in corsMap) {
-        finalUrl = corsMap[url];
+        finalUrl = corsMap[url].url ? corsMap[url].url : url;
         console.warn(`using cors workaround for ${url} (${finalUrl})`);
+        if (corsMap[url].accept) {
+            options.headers.accept = corsMap[url].accept;
+            console.debug('using accept header override: ' + options.headers.accept);
+        }
     }
 
     // enforce https
@@ -164,7 +175,7 @@ async function makeRequest(url, options) {
 
     // generic fetch request with error handling
     try {
-        console.debug("fetching " + finalUrl);
+        console.debug("fetching " + options.headers.accept + " from " + finalUrl);
         const response = await fetch(finalUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
