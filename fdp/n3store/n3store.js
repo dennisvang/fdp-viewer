@@ -5,6 +5,17 @@ import "https://unpkg.com/n3/browser/n3.min.js";
 
 const parser = new N3.Parser();
 const store = new N3.Store();
+const reasoner = new N3.Reasoner(store);
+const rules = `
+{
+  ?s a ?o .
+  ?o <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?o2 .
+} => {
+  ?s a ?o2 .
+} .
+`
+const rulesParser = new N3.Parser({ format: 'text/n3' });
+const rulesStore = new N3.Store(rulesParser.parse(rules));
 const prefixes = [
     "https://w3id.org/fdp/fdp-o#",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -22,13 +33,17 @@ export async function populate(container) {
     }
 
     // show results
-    console.info("store size: " + store.size);
     for (const quad of store) {
         console.info("store contains " + quad);
         const div = document.createElement("div");
         div.textContent = quad.subject.id;
         container.appendChild(div);
     }
+
+    // apply rules to the store, mutating it
+    console.info("store size before reasoning: " + store.size);
+    reasoner.reason(rulesStore);
+    console.info("store size after reasoning: " + store.size);
 }
 
 async function parseFromUrl(url) {
