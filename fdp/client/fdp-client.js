@@ -11,6 +11,8 @@ const prefixes = {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
+const mediatypeTextTurtle = 'text/turtle';
+
 
 // workaround for CORS restrictions on purl resources
 // (redirects and CORS prevent download via purl, so we use the actual url instead)
@@ -143,7 +145,7 @@ async function getTurtle(url) {
     // get rdf-turtle content from url
     const requestOptions = {
         method: 'GET',
-        headers: {'Accept': 'text/turtle'},
+        headers: {'accept': mediatypeTextTurtle},
     };
     return await makeRequest(url, requestOptions);
 }
