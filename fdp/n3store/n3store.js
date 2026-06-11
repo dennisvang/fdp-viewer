@@ -16,8 +16,10 @@ export async function populate(container) {
     // populates the html page with rdf statements from the store
     console.info("populate() called");
 
-    // parse prefix urls
-    prefixes.forEach(parseFromUrl);
+    // parse prefix urls in a synchronous manner
+    for (const url of prefixes) {
+        await parseFromUrl(url);
+    }
 
     // show results
     console.info("store size: " + store.size);
