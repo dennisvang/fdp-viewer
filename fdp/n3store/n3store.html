@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FDP client</title>
+</head>
+<body>
+
+<div class="container"></div>
+
+<script type="module">
+    import { populate } from "./n3store.js";
+
+    const container = document.querySelector('.container');
+
+    // main call
+    populate(container);
+</script>
+
+</body>
+</html>
