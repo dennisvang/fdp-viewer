@@ -12,6 +12,12 @@ const prefixes = {
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
 
+// workaround for CORS restrictions on purl resources
+// (redirects and CORS prevent download via purl, so we use the actual url instead)
+const corsMap = {
+    "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl"
+};
+
 function getLabel(iri) {
     // try to get a human readable label for an iri
     // default to prefix substitution
@@ -142,9 +148,17 @@ async function getTurtle(url) {
 }
 
 async function makeRequest(url, options) {
+    // workaround for CORS/redirect issues with some peristent urls
+    // (see https://github.com/fdp-specs/fdp-specs.github.io/issues/35 for details)
+    let finalUrl = url;
+    if (url in corsMap) {
+        finalUrl = corsMap[url];
+        console.warn(`using cors workaround for ${url} (${finalUrl})`);
+    }
+
     // generic fetch request with error handling
     try {
-        const response = await fetch(url, options);
+        const response = await fetch(finalUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
