@@ -20,9 +20,9 @@ export async function populate(container) {
     prefixes.forEach(parseFromUrl);
 
     // show results
+    console.info("store size: " + store.size);
     for (const quad of store) {
-        console.debug(quad);
-        // console.info("store contains " + quad);
+        console.info("store contains " + quad);
         const div = document.createElement("div");
         div.textContent = quad.subject.id;
         container.appendChild(div);
