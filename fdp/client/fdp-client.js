@@ -77,6 +77,7 @@ function createElementIRI(iri, ...classes) {
     iriElement.href = iri;
     iriElement.target = "_blank";
     iriElement.textContent = getLabel(iri);
+    iriElement.title = withPrefixes(iri);
     if (classes && classes.length) {
         iriElement.classList.add(classes);
     }
