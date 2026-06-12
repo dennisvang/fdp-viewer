@@ -141,8 +141,14 @@ export async function parseFromUrl(url, maxDepth, depth) {
     parser.parse(ttl, {
         onQuad: (err, quad) => {
             if (quad !== null) {
-                store.add(quad);
-                // console.debug("added to store: " + quad.subject.id)
+                try {
+                    store.add(quad);
+                    console.debug("added to store: " + quad.subject.id)
+                } catch (error) {
+                    console.warn("parser failed for " + url);
+                    console.debug(error);
+                    console.debug(quad);
+                }
             }
         },
         onPrefix: (prefix, iri) => {
