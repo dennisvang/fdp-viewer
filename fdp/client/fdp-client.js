@@ -138,30 +138,38 @@ export async function parseFromUrl(url, maxDepth, depth) {
         depth = 0;
     }
     const ttl = await getTurtle(url);
-    parser.parse(ttl, {
-        onQuad: (err, quad) => {
-            if (quad !== null) {
-                try {
-                    store.add(quad);
-                    console.debug("added to store: " + quad.subject.id)
-                } catch (error) {
-                    console.warn("parser failed for " + url);
-                    console.debug(error);
-                    console.debug(quad);
+    try {
+        parser.parse(ttl, {
+            onQuad: (err, quad) => {
+                if (quad !== null) {
+                    try {
+                        store.add(quad);
+                        console.debug("added to store: " + quad.subject.id)
+                    } catch (quadError) {
+                        console.warn("parser failed due to quad from " + url);
+                        console.warn("quad: " + quad);
+                        console.warn(err);
+                        console.debug(quadError);
+                        console.debug(quad);
+                    }
                 }
-            }
-        },
-        onPrefix: (prefix, iri) => {
-            console.debug(prefix);
-            prefixes[prefix] = iri.id;
-            if (depth < maxDepth) {
-                console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
-                parseFromUrl(iri.id, maxDepth, depth + 1);
-            } else {
-                console.log(`skipping prefix ${prefix} (depth ${depth})`);
-            }
-        },
-    });
+            },
+            onPrefix: (prefix, iri) => {
+                console.debug(prefix);
+                prefixes[prefix] = iri.id;
+                if (depth < maxDepth) {
+                    console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
+                    parseFromUrl(iri.id, maxDepth, depth + 1);
+                } else {
+                    console.log(`skipping prefix ${prefix} (depth ${depth})`);
+                }
+            },
+        });
+    } catch (ttlError) {
+        console.warn("parser failed due to ttl from " + url);
+        console.warn("ttl: " + ttl);
+        console.debug(ttlError);
+    }
 }
 
 async function getTurtle(url) {
