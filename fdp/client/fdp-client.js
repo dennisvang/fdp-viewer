@@ -3,6 +3,9 @@
 
 // use <script type="module" ...> to ensure page is loaded (instead of load event)
 
+// todo: use rdf-dereference package or parse xml using dedicated package?
+// todo: add reasoning
+
 import "https://unpkg.com/n3/browser/n3.min.js";
 
 const factory = N3.DataFactory;
