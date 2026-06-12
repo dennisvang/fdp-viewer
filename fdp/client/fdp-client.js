@@ -155,7 +155,8 @@ export async function parseFromUrl(url, maxDepth, depth) {
                 prefixes[prefix] = iri.id;
                 if (depth < maxDepth) {
                     console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
-                    parseFromUrl(iri.id, maxDepth, depth + 1);
+                    parseFromUrl(iri.id, maxDepth, depth + 1)
+                        .then(() => console.info("parsing done for %s", iri.id));
                 } else {
                     console.log(`skipping prefix ${prefix} (depth ${depth})`);
                 }
