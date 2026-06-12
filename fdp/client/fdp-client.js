@@ -148,6 +148,11 @@ function createElementSubject(subject) {
 }
 
 export async function populate(containerElement, url) {
+    // get core rdf ontologies
+    for (const key of ["rdf", "rdfs"]) {
+        await parseFromUrl(prefixes[key]);
+    }
+
     // wait for all promises to be fulfilled
     if (recursiveParsePromises.length > 0) {
         console.info("awaiting %d promises", recursiveParsePromises.length);
