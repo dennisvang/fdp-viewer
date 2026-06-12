@@ -146,8 +146,8 @@ export async function parseFromUrl(url, maxDepth, depth) {
                     console.debug("added to store: " + quad.subject.id)
                 }
                 if (error) {
-                    console.warn("failed to parse quad for %s", url);
-                    console.warn(error);
+                    console.warn("failed to parse quad for %s:\n%s", url, error);
+                    console.debug(error);
                 }
             },
             onPrefix: (prefix, iri) => {
