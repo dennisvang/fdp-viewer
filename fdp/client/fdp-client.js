@@ -121,7 +121,7 @@ function createElementSubject(subject) {
     return subjectElement;
 }
 
-export async function populate(containerElement) {
+export async function populate(containerElement, url) {
     // wait for all promises to be fulfilled
     if (recursiveParsePromises.length > 0) {
         console.info("awaiting %d promises", recursiveParsePromises.length);
@@ -130,12 +130,12 @@ export async function populate(containerElement) {
     }
 
     // populates the html page with rdf statements from the store
-    console.debug("populate() called");
+    console.debug("populate() called for url %s", url);
     console.debug(prefixes);
-    store.forSubjects(subject => {
-        containerElement.appendChild(createElementSubject(subject));
-        console.log(subject);
-    });
+    store.forEach(quad => {
+        containerElement.appendChild(createElementSubject(quad.subject));
+        console.log(quad.subject);
+    }, namedNode(url), null, null, null);
 
     console.info("store size: %d", store.size);
 
