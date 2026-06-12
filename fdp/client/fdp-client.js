@@ -30,15 +30,21 @@ const corsMap = {
     }
 };
 
-function getLabel(iri) {
+function getLabel(iri, language="en") {
     // try to get a human readable label for an iri
     // default to prefix substitution
     let label = withPrefixes(iri);
     // try to get actual label for iri
-    const objects = store.getObjects(iri, "http://www.w3.org/2000/01/rdf-schema#label");
-    if (objects.length) {
-        // todo: handle multiple labels...
-        label = objects[0].id;
+    const labels = store.getObjects(iri, "http://www.w3.org/2000/01/rdf-schema#label");
+    const languageTag = "@" + language;
+    for (const labelCandidate of labels) {
+        console.debug("found label candidate: %s", labelCandidate.id);
+        if (labelCandidate.id.endsWith(languageTag) || !labelCandidate.id.includes("@")) {
+            label = labelCandidate.id.replaceAll("\"", "").replaceAll(languageTag, "");
+            console.debug("found label for %s: %s (language: %s)", iri, label, language);
+            // break on first match
+            break;
+        }
     }
     // if all else fails, fall back on iri representation
     if (label === iri) {
