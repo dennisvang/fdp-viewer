@@ -4,7 +4,6 @@
 // use <script type="module" ...> to ensure page is loaded (instead of load event)
 
 // todo: use rdf-dereference package or parse xml using dedicated package?
-// todo: add reasoning
 
 import "https://unpkg.com/n3/browser/n3.min.js";
 
@@ -18,6 +17,27 @@ const prefixes = {
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
 const mediatypeTextTurtle = 'text/turtle';
+
+// reasoning/inferencing
+const rules = `
+# infer subclass
+{
+  ?subject a ?object .
+  ?object <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?otherObject .
+} => {
+  ?subject a ?otherObject .
+} .
+# infer subproperty
+{
+  ?subject ?predicate ?object .
+  ?predicate <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> ?otherPredicate .
+} => {
+  ?subject ?otherPredicate ?object .
+} .
+`;
+const rulesParser = new N3.Parser({ format: 'text/n3' });
+const rulesStore = new N3.Store(rulesParser.parse(rules));
+const reasoner = new N3.Reasoner(store);
 
 // keep track of recursive promises so we can wait for them to be fulfilled
 const recursiveParsePromises = [];
@@ -147,7 +167,10 @@ export async function populate(containerElement, url) {
         // only include subjects from the root fdp graph
         factory.namedNode(url));
 
-    console.info("store size: %d", store.size);
+    // apply inference rules to the store (this adds statements)
+    console.info("store size before reasoning: " + store.size);
+    reasoner.reason(rulesStore);
+    console.info("store size after reasoning: " + store.size);
 
     // TODO: why are ontologies not added to the store? the following queries should
     //  yield the same result due to inference, because fdp-o:metadataIssued is a
