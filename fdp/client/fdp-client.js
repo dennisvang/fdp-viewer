@@ -177,12 +177,18 @@ export async function populate(containerElement, url) {
     reasoner.reason(rulesStore);
     console.info("store size after reasoning: " + store.size);
 
-    // TODO: why are ontologies not added to the store? the following queries should
-    //  yield the same result due to inference, because fdp-o:metadataIssued is a
-    //  subproperty of dcterms:date
+    // TODO: why don't the following queries yield the same result?
+    //  They should, due to inference, because fdp-o:metadataIssued is a
+    //  subproperty of dcterms:date, right?
     console.log("get subjects:");
-    console.log(store.getSubjects(factory.namedNode("https://w3id.org/fdp/fdp-o#metadataIssued"), null, null));
-    console.log(store.getSubjects(factory.namedNode("http://purl.org/dc/terms/date"), null, null));
+    console.log(store.getSubjects(
+        factory.namedNode("https://w3id.org/fdp/fdp-o#metadataIssued"),
+        null,
+        factory.namedNode(url)));
+    console.log(store.getSubjects(
+        factory.namedNode("http://purl.org/dc/terms/date"),
+        null,
+        factory.namedNode(url)));
 
 }
 
