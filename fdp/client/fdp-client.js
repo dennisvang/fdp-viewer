@@ -145,7 +145,7 @@ export async function parseFromUrl(url, maxDepth, depth) {
             onQuad: (error, quad) => {
                 if (quad) {
                     store.add(quad);
-                    console.debug("added to store: " + quad.subject.id)
+                    console.debug("added to store: %s", quad.subject.id)
                 }
                 if (error) {
                     console.warn("failed to parse quad for %s:\n%s", url, error);
@@ -156,11 +156,11 @@ export async function parseFromUrl(url, maxDepth, depth) {
                 console.debug(prefix);
                 prefixes[prefix] = iri.id;
                 if (depth < maxDepth) {
-                    console.log(`(depth ${depth}) getting ttl for prefix: ${prefix} (${iri.id})`);
+                    console.debug("(depth %d) getting ttl for prefix: %s (%s)", depth, prefix, iri.id);
                     parseFromUrl(iri.id, maxDepth, depth + 1)
                         .then(() => console.info("parsing done for %s", iri.id));
                 } else {
-                    console.log(`skipping prefix ${prefix} (depth ${depth})`);
+                    console.debug("skipping prefix %s (depth %d)", prefix, depth);
                 }
             },
         });
@@ -187,7 +187,7 @@ async function makeRequest(url, options) {
         console.warn(`using cors workaround for ${url} (${finalUrl})`);
         if (corsMap[url].accept) {
             options.headers.accept = corsMap[url].accept;
-            console.debug('using accept header override: ' + options.headers.accept);
+            console.debug('using accept header override: %s', options.headers.accept);
         }
     }
 
@@ -196,12 +196,12 @@ async function makeRequest(url, options) {
 
     // generic fetch request with error handling
     try {
-        console.debug("fetching " + options.headers.accept + " from " + finalUrl);
+        console.debug("fetching %s from %s", options.headers.accept, finalUrl);
         const response = await fetch(finalUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
-        console.debug("got success response from " + url);
+        console.debug("got success response from %s", url);
         return await response.text();
     } catch (error) {
         console.error(error);
