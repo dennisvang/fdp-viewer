@@ -5,7 +5,7 @@
 
 import "https://unpkg.com/n3/browser/n3.min.js";
 
-const namedNode = N3.DataFactory.namedNode;
+const factory = N3.DataFactory;
 const parser = new N3.Parser();
 const store = new N3.Store();
 const prefixes = {
@@ -137,7 +137,7 @@ export async function populate(containerElement, url) {
     store.forEach(quad => {
         containerElement.appendChild(createElementSubject(quad.subject));
         console.log(quad.subject);
-    }, namedNode(url), null, null, null);
+    }, factory.namedNode(url), null, null, null);
 
     console.info("store size: %d", store.size);
 
@@ -145,8 +145,8 @@ export async function populate(containerElement, url) {
     //  yield the same result due to inference, because fdp-o:metadataIssued is a
     //  subproperty of dcterms:date
     console.log("get subjects:");
-    console.log(store.getSubjects(namedNode("https://w3id.org/fdp/fdp-o#metadataIssued"), null, null));
-    console.log(store.getSubjects(namedNode("http://purl.org/dc/terms/date"), null, null));
+    console.log(store.getSubjects(factory.namedNode("https://w3id.org/fdp/fdp-o#metadataIssued"), null, null));
+    console.log(store.getSubjects(factory.namedNode("http://purl.org/dc/terms/date"), null, null));
 
 }
 
@@ -162,8 +162,14 @@ export async function parseFromUrl(url, maxDepth, depth) {
         parser.parse(ttl, {
             onQuad: (error, quad) => {
                 if (quad) {
-                    store.add(quad);
-                    console.debug("added to store: %s", quad.subject.id)
+                    // todo: can't we just modify the graph on the existing quad?
+                    const newQuad = factory.quad(
+                        quad.subject,
+                        quad.predicate,
+                        quad.object,
+                        factory.namedNode(url));
+                    store.add(newQuad);
+                    console.debug("added to store: %s (graph: %s)", newQuad.subject.id, newQuad.graph.id);
                 }
                 if (error) {
                     console.warn("failed to parse quad for %s:\n%s", url, error);
