@@ -8,12 +8,12 @@ const store = new N3.Store();
 const reasoner = new N3.Reasoner(store);
 const rules = `
 {
-  ?s a ?o .
-  ?o <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?o2 .
+  ?subject a ?object .
+  ?object <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?otherObject .
 } => {
-  ?s a ?o2 .
+  ?subject a ?otherObject .
 } .
-`
+`;
 const rulesParser = new N3.Parser({ format: 'text/n3' });
 const rulesStore = new N3.Store(rulesParser.parse(rules));
 const prefixes = [
