@@ -138,20 +138,16 @@ export async function parseFromUrl(url, maxDepth, depth) {
         depth = 0;
     }
     const ttl = await getTurtle(url);
-    try {
+    if (ttl) {
         parser.parse(ttl, {
-            onQuad: (err, quad) => {
-                if (quad !== null) {
-                    try {
-                        store.add(quad);
-                        console.debug("added to store: " + quad.subject.id)
-                    } catch (quadError) {
-                        console.warn("parser failed due to quad from " + url);
-                        console.warn("quad: " + quad);
-                        console.warn(err);
-                        console.debug(quadError);
-                        console.debug(quad);
-                    }
+            onQuad: (error, quad) => {
+                if (quad) {
+                    store.add(quad);
+                    console.debug("added to store: " + quad.subject.id)
+                }
+                if (error) {
+                    console.warn("failed to parse quad for %s", url);
+                    console.warn(error);
                 }
             },
             onPrefix: (prefix, iri) => {
@@ -165,10 +161,8 @@ export async function parseFromUrl(url, maxDepth, depth) {
                 }
             },
         });
-    } catch (ttlError) {
-        console.warn("parser failed due to ttl from " + url);
-        console.warn("ttl: " + ttl);
-        console.debug(ttlError);
+    } else {
+        console.warn("failed to get turtle from %s", url);
     }
 }
 
