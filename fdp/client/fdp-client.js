@@ -138,10 +138,14 @@ export async function populate(containerElement, url) {
     // populates the html page with rdf statements from the store
     console.debug("populate() called for url %s", url);
     console.debug(prefixes);
-    store.forEach(quad => {
-        containerElement.appendChild(createElementSubject(quad.subject));
-        console.log(quad.subject);
-    }, factory.namedNode(url), null, null, null);
+    store.forSubjects(subject => {
+            containerElement.appendChild(createElementSubject(subject));
+            console.info("subject populated: %s", subject.value);
+        },
+        null,
+        null,
+        // only include subjects from the root fdp graph
+        factory.namedNode(url));
 
     console.info("store size: %d", store.size);
 
