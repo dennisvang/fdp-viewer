@@ -14,6 +14,8 @@ const prefixes = {
 };
 const mediatypeTextTurtle = 'text/turtle';
 
+// keep track of recursive promises so we can wait for them to be fulfilled
+const recursiveParsePromises = [];
 
 // workaround for CORS restrictions on purl resources
 // (redirects and CORS prevent download via purl, so we use the actual url instead)
@@ -114,6 +116,13 @@ function createElementSubject(subject) {
 }
 
 export async function populate(containerElement) {
+    // wait for all promises to be fulfilled
+    if (recursiveParsePromises.length > 0) {
+        console.info("awaiting %d promises", recursiveParsePromises.length);
+        await Promise.all(recursiveParsePromises);
+        console.info("promises fulfilled");
+    }
+
     // populates the html page with rdf statements from the store
     console.debug("populate() called");
     console.debug(prefixes);
@@ -141,6 +150,7 @@ export async function parseFromUrl(url, maxDepth, depth) {
     }
     const ttl = await getTurtle(url);
     if (ttl) {
+        // parse the turtle content
         parser.parse(ttl, {
             onQuad: (error, quad) => {
                 if (quad) {
@@ -157,8 +167,8 @@ export async function parseFromUrl(url, maxDepth, depth) {
                 prefixes[prefix] = iri.id;
                 if (depth < maxDepth) {
                     console.debug("(depth %d) getting ttl for prefix: %s (%s)", depth, prefix, iri.id);
-                    parseFromUrl(iri.id, maxDepth, depth + 1)
-                        .then(() => console.info("parsing done for %s", iri.id));
+                    const recursiveParsePromise = parseFromUrl(iri.id, maxDepth, depth + 1);
+                    recursiveParsePromises.push(recursiveParsePromise);
                 } else {
                     console.debug("skipping prefix %s (depth %d)", prefix, depth);
                 }
