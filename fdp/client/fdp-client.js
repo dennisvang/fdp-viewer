@@ -122,6 +122,8 @@ export async function populate(containerElement) {
         console.log(subject);
     });
 
+    console.info("store size: %d", store.size);
+
     // TODO: why are ontologies not added to the store? the following queries should
     //  yield the same result due to inference, because fdp-o:metadataIssued is a
     //  subproperty of dcterms:date
