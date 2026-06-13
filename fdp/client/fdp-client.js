@@ -52,7 +52,11 @@ const corsMap = {
     "http://www.w3.org/2001/XMLSchema#": {
         "url": undefined,
         "accept": "application/xml",
-    }
+    },
+    "https://w3id.org/fdp/fdp-o#": {
+        "url": "fdp-o.ttl",
+        "accept": undefined,
+    },
 };
 
 function getLabel(iri, language="en") {
@@ -149,7 +153,7 @@ function createElementSubject(subject) {
 
 export async function populate(containerElement, url) {
     // get core rdf ontologies
-    for (const key of ["rdf", "rdfs"]) {
+    for (const key of ["fdp-o", "rdf", "rdfs"]) {
         await parseFromUrl(prefixes[key]);
     }
 

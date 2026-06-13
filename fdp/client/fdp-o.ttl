@@ -1,0 +1,252 @@
+@prefix : <http://purl.org/fdp/fdp-o/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcam: <http://purl.org/dc/dcam/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix fdp-o: <http://purl.org/fdp/fdp-o#> .
+@prefix schema: <http://schema.org/> .
+@prefix re3data: <http://www.re3data.org/schema/3-0#> .
+@prefix biosemantics: <http://rdf.biosemantics.org/ontologies/fdp-o#> .
+
+# ============================================================================
+# Ontology Declaration
+# ============================================================================
+
+<https://w3id.org/fdp/fdp-o#>
+    a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/fdp/fdp-o#> ;
+    dct:creator <https://github.com/kburger> ;
+    dct:creator <https://github.com/luizbonino> ;
+    dct:creator <https://github.com/rajaram5> ;
+    dct:description "This ontology describes the elements of the FAIR Data Point (FDP) and their relations. It serves as a reference model to annotate the metadata content of the FDP"@en ;
+    dct:hasVersion "1.0"@en ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/legalcode> ;
+    rdfs:label "FAIR Data Point Ontology"@en .
+
+# ============================================================================
+# Annotation Properties
+# ============================================================================
+
+dc:creator
+    a owl:AnnotationProperty .
+
+dc:date
+    a owl:AnnotationProperty .
+
+dct:creator
+    a owl:AnnotationProperty .
+
+dct:description
+    a owl:AnnotationProperty .
+
+dct:hasVersion
+    a owl:AnnotationProperty .
+
+dct:license
+    a owl:AnnotationProperty .
+
+skos:closeMatch
+    a owl:AnnotationProperty .
+
+# ============================================================================
+# Object Properties
+# ============================================================================
+
+biosemantics:metadataIdentifier
+    a owl:ObjectProperty ;
+    owl:equivalentProperty fdp-o:metadataIdentifier ;
+    rdfs:subPropertyOf fdp-o:deprecatedObjectProperties ;
+    owl:deprecated true .
+
+re3data:repositoryIdentifier
+    a owl:ObjectProperty ;
+    owl:equivalentProperty fdp-o:fdpIdentifier .
+
+dcat:catalog
+    a owl:ObjectProperty .
+
+dcat:servesDataset
+    a owl:ObjectProperty .
+
+fdp-o:deprecatedObjectProperties
+    a owl:ObjectProperty .
+
+fdp-o:fdpIdentifier
+    a owl:ObjectProperty ;
+    rdfs:domain fdp-o:FAIRDataPoint .
+
+fdp-o:hasMetadata
+    a owl:ObjectProperty ;
+    owl:inverseOf fdp-o:isMetadataOf ;
+    rdfs:domain dcat:Resource ;
+    rdfs:range fdp-o:MetadataRecord .
+
+fdp-o:isMetadataOf
+    a owl:ObjectProperty ;
+    rdfs:domain fdp-o:MetadataRecord ;
+    rdfs:range dcat:Resource .
+
+fdp-o:metadataCatalog
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf owl:topObjectProperty ;
+    rdfs:domain fdp-o:Metadata ;
+    rdfs:range dcat:Catalog ;
+    rdfs:label "Metadata catalog" ;
+    skos:closeMatch dcat:catalog .
+
+fdp-o:metadataIdentifier
+    a owl:ObjectProperty ;
+    rdfs:domain fdp-o:Metadata .
+
+fdp-o:servesMetadata
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf dcat:servesDataset ;
+    rdfs:domain fdp-o:MetadataService ;
+    rdfs:range fdp-o:Metadata ;
+    rdfs:label "serves metadata" .
+
+# ============================================================================
+# Data Properties
+# ============================================================================
+
+dct:date
+    a owl:DatatypeProperty .
+
+biosemantics:metadataIssued
+    a owl:DatatypeProperty ;
+    owl:equivalentProperty fdp-o:metadataIssued ;
+    owl:deprecated true .
+
+biosemantics:metadataModified
+    a owl:DatatypeProperty ;
+    owl:equivalentProperty fdp-o:metadataModified ;
+    owl:deprecated true .
+
+fdp-o:fdpEndDate
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf dct:date ;
+    rdfs:domain fdp-o:FAIRDataPoint ;
+    rdfs:range xsd:date .
+
+fdp-o:fdpSoftwareVersion
+    a owl:DatatypeProperty ;
+    rdfs:domain fdp-o:FAIRDataPoint ;
+    rdfs:range xsd:string .
+
+fdp-o:fdpStartDate
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf dct:date ;
+    rdfs:domain fdp-o:FAIRDataPoint ;
+    rdfs:range xsd:date .
+
+fdp-o:fdpUILanguage
+    a owl:DatatypeProperty ;
+    rdfs:domain fdp-o:FAIRDataPoint ;
+    rdfs:range xsd:anyURI .
+
+fdp-o:metadataIssued
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf dct:date ;
+    rdfs:domain fdp-o:Metadata ;
+    rdfs:range xsd:dateTime .
+
+fdp-o:metadataModified
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf dct:date ;
+    rdfs:domain fdp-o:Metadata ;
+    rdfs:range xsd:dateTime .
+
+fdp-o:metadataVersion
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf owl:topDataProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "metadataVersion" .
+
+# ============================================================================
+# Classes
+# ============================================================================
+
+biosemantics:DataRecord
+    a owl:Class ;
+    rdfs:subClassOf fdp-o:DeprecatedClasses ;
+    owl:deprecated true .
+
+biosemantics:Metadata
+    a owl:Class ;
+    owl:equivalentClass fdp-o:Metadata ;
+    rdfs:subClassOf fdp-o:DeprecatedClasses ;
+    owl:deprecated true .
+
+re3data:Repository
+    a owl:Class ;
+    rdfs:subClassOf prov:Entity .
+
+dcat:Catalog
+    a owl:Class .
+
+dcat:DataService
+    a owl:Class .
+
+dcat:Dataset
+    a owl:Class ;
+    rdfs:subClassOf dcat:Resource .
+
+dcat:Resource
+    a owl:Class .
+
+prov:Agent
+    a owl:Class ;
+    rdfs:label "Agent" .
+
+prov:Entity
+    a owl:Class .
+
+fdp-o:DeprecatedClasses
+    a owl:Class .
+
+fdp-o:FAIRDataPoint
+    a owl:Class ;
+    rdfs:subClassOf fdp-o:MetadataService ;
+    rdfs:label "FAIR Data Point" ;
+    skos:closeMatch re3data:Repository .
+
+fdp-o:Metadata
+    a owl:Class ;
+    rdfs:subClassOf dcat:Dataset ;
+    dc:creator <http://orcid.org/0000-0002-1164-1351> ;
+    dc:date "2020-09-25T10:09:40Z"^^xsd:dateTime .
+
+fdp-o:MetadataRecord
+    a owl:Class ;
+    rdfs:label "Metadata Record"@en .
+
+fdp-o:MetadataService
+    a owl:Class ;
+    rdfs:subClassOf dcat:DataService ;
+    rdfs:comment "In the context of FAIR Data Point these two classes can be treated as exactMatch. Since class Repository has been used in v..." ;
+    rdfs:label "Metadata service" ;
+    skos:closeMatch re3data:Repository .
+
+# ============================================================================
+# Individuals (Named Individuals)
+# ============================================================================
+
+<https://github.com/kburger>
+    a owl:NamedIndividual ;
+    rdfs:label "Kees Burger" .
+
+<https://github.com/luizbonino>
+    a owl:NamedIndividual ;
+    rdfs:label "Luiz Olavo Bonino da Silva Santos" .
+
+<https://github.com/rajaram5>
+    a owl:NamedIndividual ;
+    rdfs:label "Rajaram Kaliyaperumal" .
+
