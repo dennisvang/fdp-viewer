@@ -5,11 +5,11 @@
 
 // todo: use rdf-dereference package or parse xml using dedicated package?
 
-import "https://unpkg.com/n3/browser/n3.min.js";
+import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
 
-const factory = N3.DataFactory;
-const parser = new N3.Parser();
-const store = new N3.Store();
+const factory = DataFactory;
+const parser = new Parser();
+const store = new Store();
 const prefixes = {
     "fdp": url,
     "fdp-o": "https://w3id.org/fdp/fdp-o#",
@@ -35,9 +35,9 @@ const rules = `
   ?subject ?otherPredicate ?object .
 } .
 `;
-const rulesParser = new N3.Parser({ format: 'text/n3' });
-const rulesStore = new N3.Store(rulesParser.parse(rules));
-const reasoner = new N3.Reasoner(store);
+const rulesParser = new Parser({ format: 'text/n3' });
+const rulesStore = new Store(rulesParser.parse(rules));
+const reasoner = new Reasoner(store);
 
 // keep track of recursive promises so we can wait for them to be fulfilled
 const recursiveParsePromises = [];
