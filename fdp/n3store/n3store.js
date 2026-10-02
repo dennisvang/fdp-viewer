@@ -1,11 +1,11 @@
 // https://github.com/rdfjs/N3.js/
 // use <script type="module" ...> to ensure page is loaded (instead of load event)
 
-import "https://unpkg.com/n3/browser/n3.min.js";
+import { Parser, Reasoner, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
 
-const parser = new N3.Parser();
-const store = new N3.Store();
-const reasoner = new N3.Reasoner(store);
+const parser = new Parser();
+const store = new Store();
+const reasoner = new Reasoner(store);
 const rules = `
 {
   ?subject a ?object .
@@ -14,8 +14,8 @@ const rules = `
   ?subject a ?otherObject .
 } .
 `;
-const rulesParser = new N3.Parser({ format: 'text/n3' });
-const rulesStore = new N3.Store(rulesParser.parse(rules));
+const rulesParser = new Parser({ format: 'text/n3' });
+const rulesStore = new Store(rulesParser.parse(rules));
 const prefixes = [
     "https://w3id.org/fdp/fdp-o#",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
