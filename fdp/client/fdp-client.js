@@ -248,12 +248,13 @@ async function parseFromUrl(url, maxDepth, depth) {
         parser.parse(ttl, {
             onQuad: (error, quad) => {
                 if (quad) {
+                    const graph = factory.namedNode(url);
                     // todo: can't we just modify the graph on the existing quad?
                     const newQuad = factory.quad(
                         quad.subject,
                         quad.predicate,
                         quad.object,
-                        factory.namedNode(url));
+                        graph);
                     store.add(newQuad);
                     console.debug("added to store: %s (graph: %s)", newQuad.subject.id, newQuad.graph.id);
                 }
