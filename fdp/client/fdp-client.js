@@ -68,6 +68,8 @@ export function updateFdp(fdpUrl, container) {
     prefixes.fdp = fdpUrl;
     // parse fdp and populate
     parseFromUrl(prefixes.fdp, 1).then(() => populate(container));
+    // intercept anchor clicks (duplicate listeners are ignored)
+    container.addEventListener("click", handleAnchorClicks);
 }
 
 // removes all triples from the store and clears the container
@@ -76,6 +78,17 @@ function clearFdp(container) {
     store.removeMatches(null, null, null, null);
     // remove all html elements from the container
     container.innerHTML = "";
+}
+
+// uses event delegation to intercept all anchor clicks and decide between internal
+// and external navigation
+function handleAnchorClicks(event) {
+    if (event.target.nodeName === "A") {
+        if (event.target.href.startsWith(prefixes.fdp + "#")) {
+            // cancel external navigation
+            event.preventDefault();
+        }
+    }
 }
 
 function getLabel(iri, language="en") {
