@@ -85,8 +85,8 @@ function clearFdp(container) {
  * and external navigation
  */
 function handleAnchorClicks(event) {
-    if (event.target.nodeName === "A") {
-        if (event.target.href.startsWith(prefixes.fdp + "#")) {
+    if (event.target.nodeName === "A" && event.target.href.startsWith(prefixes.fdp)) {
+        if (event.target.href.includes("#")) {
             // cancel external navigation
             event.preventDefault();
         }
