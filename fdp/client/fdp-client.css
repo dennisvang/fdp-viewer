@@ -9,6 +9,11 @@ body {
     grid-gap: 0.5em;
 }
 
+.controls {
+    display: flex;
+    padding-bottom: 1em;
+}
+
 .rdf-statement {
     margin: 0.25em;
 }
@@ -50,4 +55,8 @@ body {
     margin-left: -0.5em;
     margin-right: -0.5em;
     padding: 0.5em;
+}
+
+#url-input {
+    flex-grow: 1;
 }
