@@ -90,7 +90,32 @@ function handleAnchorClicks(event) {
             // cancel external navigation
             event.preventDefault();
         }
+        // todo: infer all child and parent uris (inferRelatedResources) based on
+        //  dcterms hasPart and isPartOf, then check if the target href matches one of
+        //  those uris and re-populate the container with that resource
     }
+}
+
+/** todo: make this work (maybe split out the reasoning part because that's only needed once after parsing all prefixes...) */
+function inferRelatedResources() {
+    // apply inference rules to the store (this adds statements)
+    console.info("store size before reasoning: " + store.size);
+    reasoner.reason(rulesStore);
+    console.info("store size after reasoning: " + store.size);
+
+    // todo: this does not work yet... maybe due to different graphs? or mismatch with subject uri trailing slash?
+    const children = store.getObjects(
+        factory.namedNode(fdpUrl),
+        factory.namedNode("http://purl.org/dc/terms/hasPart"),
+        null);
+    const parents = store.getObjects(
+        factory.namedNode(fdpUrl),
+        factory.namedNode("http://purl.org/dc/terms/isPartOf"),
+        null);
+    console.log(children)
+    console.log(parents)
+    console.log(store._getGraphs(null))
+
 }
 
 /** tries to get a human readable label for an iri */
@@ -214,24 +239,15 @@ async function populate(containerElement) {
         // only include subjects from the root fdp graph
         factory.namedNode(fdpUrl));
 
-    // apply inference rules to the store (this adds statements)
-    console.info("store size before reasoning: " + store.size);
+    // temp (todo: remove, because this was just to show that it does work with the actual predicate, just not with inference yet...)
     reasoner.reason(rulesStore);
-    console.info("store size after reasoning: " + store.size);
-
-    // TODO: why don't the following queries yield the same result?
-    //  They should, due to inference, because fdp-o:metadataIssued is a
-    //  subproperty of dcterms:date, right?
-    console.log("get subjects:");
-    console.log(store.getSubjects(
-        factory.namedNode("https://w3id.org/fdp/fdp-o#metadataIssued"),
-        null,
-        factory.namedNode(fdpUrl)));
-    console.log(store.getSubjects(
-        factory.namedNode("http://purl.org/dc/terms/date"),
-        null,
-        factory.namedNode(fdpUrl)));
-
+    console.log(
+        store.getObjects(
+            factory.namedNode(fdpUrl),
+            factory.namedNode("https://w3id.org/fdp/fdp-o#metadataCatalog"),
+            null
+        ).map(o => o.id)
+    )
 }
 
 /**
