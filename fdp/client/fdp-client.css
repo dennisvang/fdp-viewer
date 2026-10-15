@@ -17,6 +17,10 @@ body {
     margin: 0.25em;
 }
 
+.rdf-predicate {
+    font-style: italic;
+}
+
 .subject {
     color: white;
     padding: 0.5em;
