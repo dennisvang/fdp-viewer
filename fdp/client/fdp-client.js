@@ -60,7 +60,7 @@ const corsMap = {
     },
 };
 
-// updates all fdp content in the container
+/** updates all fdp content in the container */
 export function updateFdp(fdpUrl, container) {
     // reset container and triple store
     clearFdp(container);
@@ -72,7 +72,7 @@ export function updateFdp(fdpUrl, container) {
     container.addEventListener("click", handleAnchorClicks);
 }
 
-// removes all triples from the store and clears the container
+/** removes all triples from the store and clears the container */
 function clearFdp(container) {
     // remove all triples from the store
     store.removeMatches(null, null, null, null);
@@ -80,8 +80,10 @@ function clearFdp(container) {
     container.innerHTML = "";
 }
 
-// uses event delegation to intercept all anchor clicks and decide between internal
-// and external navigation
+/**
+ * uses event delegation to intercept all anchor clicks and decide between internal
+ * and external navigation
+ */
 function handleAnchorClicks(event) {
     if (event.target.nodeName === "A") {
         if (event.target.href.startsWith(prefixes.fdp + "#")) {
@@ -91,8 +93,8 @@ function handleAnchorClicks(event) {
     }
 }
 
+/** tries to get a human readable label for an iri */
 function getLabel(iri, language="en") {
-    // try to get a human readable label for an iri
     // default to prefix substitution
     let label = withPrefixes(iri);
     // try to get actual label for iri
@@ -114,24 +116,24 @@ function getLabel(iri, language="en") {
     return label;
 }
 
+/** replaces iris with corresponding prefixes */
 function withPrefixes(value) {
-    // replaces iris with corresponding prefixes
     for (const [prefix, prefixIRI] of Object.entries(prefixes)) {
         value = value.replace(prefixIRI, prefix + ":");
     }
     return value;
 }
 
+/** creates an html element for fancy clickable title */
 function createElementTitle(iri) {
-    // creates an html element for fancy clickable title
     const titleElement = document.createElement("div");
     titleElement.classList.add("title");
     titleElement.appendChild(createElementIRI(iri, "subject-title"));
     return titleElement;
 }
 
+/** creates a clickable html element for iri, with simplified label */
 function createElementIRI(iri, ...classes) {
-    // creates a clickable html element for iri, with simplified label
     const iriElement = document.createElement("a");
     iriElement.href = iri;
     iriElement.target = "_blank";
@@ -143,8 +145,8 @@ function createElementIRI(iri, ...classes) {
     return iriElement;
 }
 
+/** creates an html element to represent an rdf term */
 function createElementTerm(term) {
-    // creates an html element to represent an rdf term
     let termElement;
     if (term.termType === "Literal") {
         termElement = document.createElement("span");
@@ -156,9 +158,11 @@ function createElementTerm(term) {
     return termElement;
 }
 
+/**
+ * creates an html element containing a single rdf statement consisting of rdf terms
+ * <subject> <predicate> <object>
+ */
 function createElementStatement(quad) {
-    // creates an html element containing a single rdf statement
-    // consisting of rdf terms <subject> <predicate> <object>
     let statementElement = document.createElement("div");
     statementElement.classList.add("rdf-statement");
     for (const termName of ["subject", "predicate", "object"]) {
@@ -169,8 +173,8 @@ function createElementStatement(quad) {
     return statementElement;
 }
 
+/** creates an html element containing all rdf statements for the given rdf subject */
 function createElementSubject(subject) {
-    // creates an html element containing all rdf statements for the given rdf subject
     console.debug(`createElementSubject() called for ${subject.id}`);
     const subjectElement = document.createElement("div");
     subjectElement.classList.add("subject");
@@ -183,6 +187,7 @@ function createElementSubject(subject) {
     return subjectElement;
 }
 
+/** populates the html container with rdf statements from the triple store */
 async function populate(containerElement) {
     const fdpUrl = prefixes.fdp;
     // get core rdf ontologies
@@ -229,9 +234,11 @@ async function populate(containerElement) {
 
 }
 
+/**
+ * gets rdf-turtle text from the specified url and parses it into the triple store
+ * and parses prefix urls, recursively, up to specified depth
+ */
 async function parseFromUrl(url, maxDepth, depth) {
-    // gets rdf-turtle text from url and parses it into the store
-    // recursively parses prefix urls up to specified depth
     if (depth === undefined) {
         depth = 0;
     }
@@ -272,8 +279,8 @@ async function parseFromUrl(url, maxDepth, depth) {
     }
 }
 
+/** gets rdf-turtle content from url */
 async function getTurtle(url) {
-    // get rdf-turtle content from url
     const requestOptions = {
         method: 'GET',
         headers: {'accept': mediatypeTextTurtle},
@@ -281,6 +288,7 @@ async function getTurtle(url) {
     return await makeRequest(url, requestOptions);
 }
 
+/** executes an http request and returns the reponse body as text */
 async function makeRequest(url, options) {
     // workaround for CORS/redirect issues with some peristent urls
     // (see https://github.com/fdp-specs/fdp-specs.github.io/issues/35 for details)
