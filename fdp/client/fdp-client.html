@@ -15,18 +15,15 @@
 <div class="container"></div>
 
 <script type="module">
-    import { parseFromFdpUrl, populate } from "./fdp-client.js";
+    import { updateFdp } from "./fdp-client.js";
 
     const container = document.querySelector('.container');
     const editUrl = document.querySelector("#url-input");
 
-    // updates the whole thing when the user changes the url
-    function urlListener(event) {
-        parseFromFdpUrl(event.target.value).then(() => populate(container));
-    }
-
-    // add listener
-    editUrl.addEventListener("change", urlListener);
+    // listen for url changes
+    editUrl.addEventListener("change", (event) => {
+        updateFdp(event.target.value, container);
+    });
 
     // initialize
     editUrl.dispatchEvent(new Event("change"));

@@ -60,6 +60,24 @@ const corsMap = {
     },
 };
 
+// updates all fdp content in the container
+export function updateFdp(fdpUrl, container) {
+    // reset container and triple store
+    clearFdp(container);
+    // update fdp prefix because that is used by the populate method
+    prefixes.fdp = fdpUrl;
+    // parse fdp and populate
+    parseFromUrl(prefixes.fdp, 1).then(() => populate(container));
+}
+
+// removes all triples from the store and clears the container
+function clearFdp(container) {
+    // remove all triples from the store
+    store.removeMatches(null, null, null, null);
+    // remove all html elements from the container
+    container.innerHTML = "";
+}
+
 function getLabel(iri, language="en") {
     // try to get a human readable label for an iri
     // default to prefix substitution
@@ -152,7 +170,7 @@ function createElementSubject(subject) {
     return subjectElement;
 }
 
-export async function populate(containerElement) {
+async function populate(containerElement) {
     const fdpUrl = prefixes.fdp;
     // get core rdf ontologies
     for (const key of ["fdp-o", "rdf", "rdfs"]) {
@@ -196,13 +214,6 @@ export async function populate(containerElement) {
         null,
         factory.namedNode(fdpUrl)));
 
-}
-
-export async function parseFromFdpUrl(fdpUrl) {
-    // update fdp prefix because that is used by the populate method
-    prefixes.fdp = fdpUrl;
-    // parse top level fdp statements
-    return parseFromUrl(prefixes.fdp, 1);
 }
 
 async function parseFromUrl(url, maxDepth, depth) {
