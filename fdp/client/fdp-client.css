@@ -1,3 +1,9 @@
+body {
+    background-color: white;
+    font-family: monospace;
+    font-size: 10pt;
+}
+
 .container {
     display: grid;
     grid-gap: 0.5em;
@@ -12,9 +18,15 @@
 }
 
 .subject {
+    color: white;
     padding: 0.5em;
-    background-color: skyblue;
+    background-color: darkblue;
     border-radius: 0.5em;
+}
+
+.subject a {
+    color: white;
+    text-decoration-line: none;
 }
 
 .subject .rdf-subject {
@@ -27,7 +39,8 @@
 }
 
 .title {
-    background-color: cornflowerblue;
+    background-color: darkblue;
+    border-bottom: white 1px solid;
     border-radius: 0.5em 0.5em 0 0;
     margin-top: -0.5em;
     margin-left: -0.5em;
