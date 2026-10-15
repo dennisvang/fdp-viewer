@@ -1,3 +1,8 @@
+a {
+    color: white;
+    text-decoration-line: none;
+}
+
 body {
     background-color: white;
     font-family: monospace;
@@ -16,6 +21,8 @@ body {
 }
 
 .rdf-statement {
+    display: flex;
+    flex-wrap: wrap;
     margin: 0.25em;
 }
 
@@ -24,6 +31,7 @@ body {
 }
 
 .rdf-predicate {
+    color: darkgray;
     font-style: italic;
 }
 
@@ -34,17 +42,11 @@ body {
     border-radius: 0.5em;
 }
 
-.subject a {
-    color: white;
-    text-decoration-line: none;
-}
-
 .subject .rdf-subject {
     display: none;
 }
 
 .subject-title {
-    color: black;
     font-weight: bold;
 }
 
