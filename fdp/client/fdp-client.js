@@ -1,4 +1,5 @@
-// https://github.com/rdfjs/N3.js/
+// https://github.com/rdfjs/N3.js/ (repo)
+// https://rdf.js.org/N3.js/ (docs)
 // https://www.rubensworks.net/blog/2019/10/06/using-rdf-in-javascript/
 
 // use <script type="module" ...> to ensure page is loaded (instead of load event)
