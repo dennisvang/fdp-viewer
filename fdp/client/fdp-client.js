@@ -82,10 +82,6 @@ function getLabel(iri, language="en") {
     return label;
 }
 
-export function updateFdpUrl(url) {
-    prefixes.fdp = url;
-}
-
 function withPrefixes(value) {
     // replaces iris with corresponding prefixes
     for (const [prefix, prefixIRI] of Object.entries(prefixes)) {
@@ -201,7 +197,14 @@ export async function populate(containerElement) {
 
 }
 
-export async function parseFromUrl(url, maxDepth, depth) {
+export async function parseFromFdpUrl(fdpUrl) {
+    // update fdp prefix because that is used by the populate method
+    prefixes.fdp = fdpUrl;
+    // parse top level fdp statements
+    return parseFromUrl(prefixes.fdp, 1);
+}
+
+async function parseFromUrl(url, maxDepth, depth) {
     // gets rdf-turtle text from url and parses it into the store
     // recursively parses prefix urls up to specified depth
     if (depth === undefined) {
