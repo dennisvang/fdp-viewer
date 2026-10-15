@@ -11,7 +11,7 @@ const factory = DataFactory;
 const parser = new Parser();
 const store = new Store();
 const prefixes = {
-    "fdp": url,
+    "fdp": undefined,
     "fdp-o": "https://w3id.org/fdp/fdp-o#",
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
@@ -80,6 +80,10 @@ function getLabel(iri, language="en") {
         label = `<${iri}>`;
     }
     return label;
+}
+
+export function updateFdpUrl(url) {
+    prefixes.fdp = url;
 }
 
 function withPrefixes(value) {
@@ -151,7 +155,8 @@ function createElementSubject(subject) {
     return subjectElement;
 }
 
-export async function populate(containerElement, url) {
+export async function populate(containerElement) {
+    const fdpUrl = prefixes.fdp;
     // get core rdf ontologies
     for (const key of ["fdp-o", "rdf", "rdfs"]) {
         await parseFromUrl(prefixes[key]);
@@ -165,7 +170,7 @@ export async function populate(containerElement, url) {
     }
 
     // populates the html page with rdf statements from the store
-    console.debug("populate() called for url %s", url);
+    console.debug("populate() called for url %s", fdpUrl);
     console.debug(prefixes);
     store.forSubjects(subject => {
             containerElement.appendChild(createElementSubject(subject));
@@ -174,7 +179,7 @@ export async function populate(containerElement, url) {
         null,
         null,
         // only include subjects from the root fdp graph
-        factory.namedNode(url));
+        factory.namedNode(fdpUrl));
 
     // apply inference rules to the store (this adds statements)
     console.info("store size before reasoning: " + store.size);
@@ -188,11 +193,11 @@ export async function populate(containerElement, url) {
     console.log(store.getSubjects(
         factory.namedNode("https://w3id.org/fdp/fdp-o#metadataIssued"),
         null,
-        factory.namedNode(url)));
+        factory.namedNode(fdpUrl)));
     console.log(store.getSubjects(
         factory.namedNode("http://purl.org/dc/terms/date"),
         null,
-        factory.namedNode(url)));
+        factory.namedNode(fdpUrl)));
 
 }
 
