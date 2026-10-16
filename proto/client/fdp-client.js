@@ -8,8 +8,10 @@
 
 import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
 
+const mediatypeTextTurtle = "text/turtle";
+const mediatypeTextN3 = "text/n3";
 const factory = DataFactory;
-const parser = new Parser();
+const parser = new Parser({ format: mediatypeTextTurtle });
 const store = new Store();
 const prefixes = {
     "fdp": undefined,
@@ -17,7 +19,6 @@ const prefixes = {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
-const mediatypeTextTurtle = 'text/turtle';
 
 // reasoning/inferencing
 const rules = `
@@ -45,7 +46,7 @@ const rules = `
   ?subject ?otherPredicate ?object .
 } .
 `;
-const rulesParser = new Parser({ format: 'text/n3' });
+const rulesParser = new Parser({ format: mediatypeTextN3 });
 const rulesStore = new Store(rulesParser.parse(rules));
 const reasoner = new Reasoner(store);
 
