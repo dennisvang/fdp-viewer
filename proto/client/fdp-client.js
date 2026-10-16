@@ -266,6 +266,7 @@ async function parseFromUrl(url, maxDepth, depth) {
         parser.parse(ttl, {
             onQuad: (error, quad) => {
                 if (quad) {
+                    // use a dedicated graph for each parsed url (each predicate)
                     const graph = factory.namedNode(url);
                     // todo: can't we just modify the graph on the existing quad?
                     const newQuad = factory.quad(
