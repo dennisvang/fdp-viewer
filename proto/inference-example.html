@@ -22,14 +22,19 @@
 
 # copied from fdp-o
 fdp-o:MetadataService
-    a owl:Class ;
-    rdfs:subClassOf dcat:DataService .
+  a owl:Class ;
+  rdfs:subClassOf dcat:DataService .
 
 # copied from fdp-o
 fdp-o:metadataCatalog
-    a owl:ObjectProperty ;
-    rdfs:subPropertyOf owl:topObjectProperty ;
-    skos:closeMatch dcat:catalog .
+  a owl:ObjectProperty ;
+  rdfs:subPropertyOf owl:topObjectProperty ;
+  skos:closeMatch dcat:catalog .
+
+# copied from dcat
+dcat:catalog
+  a owl:ObjectProperty ;
+  rdfs:subPropertyOf dcterms:hasPart .
 
 # dummy fdp metadata (incomplete on purpose)
 <http://localhost:8080>
@@ -83,10 +88,10 @@ fdp-o:metadataCatalog
         console.info(statement.subject.id, statement.predicate.id, statement.object.id, statement.graph.id)
     }
 
-    // query store for catalogs, using inferred dcat predicate
+    // query store for catalogs, using inferred dcterms predicate
     const catalogs = store.getObjects(
         DataFactory.namedNode("http://localhost:8080"),
-        DataFactory.namedNode("http://www.w3.org/ns/dcat#catalog"),
+        DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
         null,
     );
 
