@@ -82,7 +82,9 @@ function clearFdp(container) {
 
 /**
  * uses event delegation to intercept all anchor clicks and decide between internal
- * and external navigation
+ * and external navigation.
+ * todo: use the navigation API
+ *  https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API
  */
 function handleAnchorClicks(event) {
     if (event.target.nodeName === "A" && event.target.href.startsWith(prefixes.fdp)) {
