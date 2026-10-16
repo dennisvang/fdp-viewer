@@ -151,17 +151,18 @@ function handleAnchorClicks(event) {
     }
 }
 
-/** ... */
-function getRelatedResources() {
-    const fdpUrl = prefixes.fdp;
+/** returns URIs of parents and children of the current resource */
+function getRelatedResourceUris(subjectUri) {
     const children = store.getObjects(
-        DataFactory.namedNode(fdpUrl),
+        DataFactory.namedNode(subjectUri),
         DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
-        null);
+        null,
+    ).map(c => c.id);
     const parents = store.getObjects(
-        DataFactory.namedNode(fdpUrl),
+        DataFactory.namedNode(subjectUri),
         DataFactory.namedNode("http://purl.org/dc/terms/isPartOf"),
-        null);
+        null,
+    ).map(p => p.id);
     return { children, parents };
 }
 
