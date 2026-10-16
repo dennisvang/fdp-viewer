@@ -225,7 +225,9 @@ function createElementSubject(subject) {
 
 /** populates the html container with rdf statements from the triple store */
 async function populate(containerElement) {
-    const fdpUrl = prefixes.fdp;
+    // remove trailing slash from fdp url
+    const fdpUrl = prefixes.fdp.endsWith("/") ? prefixes.fdp.slice(0, -1) : prefixes.fdp;
+    console.debug("fdp url: %s", fdpUrl);
     // get core rdf ontologies
     for (const key of ["fdp-o", "rdf", "rdfs"]) {
         await parseFromUrl(prefixes[key]);
@@ -243,13 +245,16 @@ async function populate(containerElement) {
     console.debug(prefixes);
     store.forSubjects(
         subject => {
-            containerElement.appendChild(createElementSubject(subject));
-            console.info("subject populated: %s", subject.value);
+            // only show subjects matching fdp url
+            console.debug("considering subject for population: %s", subject.id)
+            if (subject.id.startsWith(fdpUrl)) {
+                containerElement.appendChild(createElementSubject(subject));
+                console.info("subject populated: %s", subject.id);
+            }
         },
         null,
         null,
-        // only include subjects from the root fdp graph
-        factory.namedNode(fdpUrl),
+        null,
     );
 
     // temp (todo: remove, because this was just to show that it does work with the actual predicate, just not with inference yet...)
@@ -278,16 +283,8 @@ async function parseFromUrl(url, maxDepth, depth) {
         parser.parse(ttl, {
             onQuad: (error, quad) => {
                 if (quad) {
-                    // use a dedicated graph for each parsed url (each predicate)
-                    const graph = factory.namedNode(url);
-                    // todo: can't we just modify the graph on the existing quad?
-                    const newQuad = factory.quad(
-                        quad.subject,
-                        quad.predicate,
-                        quad.object,
-                        graph);
-                    store.add(newQuad);
-                    console.debug("added to store: %s (graph: %s)", newQuad.subject.id, newQuad.graph.id);
+                    store.add(quad);
+                    console.debug("added to store: %s (default graph)", quad.subject.id);
                 }
                 if (error) {
                     console.warn("failed to parse quad for %s:\n%s", url, error);
