@@ -10,8 +10,6 @@ import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/brows
 
 const mediatypeTextTurtle = "text/turtle";
 const mediatypeTextN3 = "text/n3";
-const parser = new Parser({ format: mediatypeTextTurtle });
-const store = new Store();
 const prefixes = {
     "fdp": undefined,
     "fdp-o": "https://w3id.org/fdp/fdp-o#",
@@ -19,7 +17,7 @@ const prefixes = {
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
 
-// reasoning/inferencing
+// inference rules
 const rules = `
 # infer subclass
 {
@@ -45,9 +43,6 @@ const rules = `
   ?subject ?otherPredicate ?object .
 } .
 `;
-const rulesParser = new Parser({ format: mediatypeTextN3 });
-const rulesStore = new Store(rulesParser.parse(rules));
-const reasoner = new Reasoner(store);
 
 // keep track of recursive promises so we can wait for them to be fulfilled
 const recursiveParsePromises = [];
@@ -68,6 +63,55 @@ const corsMap = {
         "accept": undefined,
     },
 };
+
+// main triple store
+const parser = new Parser({ format: mediatypeTextTurtle });
+const store = new Store();
+
+/**
+ * applies reasoning to infer relations, etc.
+ *
+ * Note that n3.js does not support reasoning over multiple graphs, so we need to copy
+ * all quads from individual graphs into the default graph of a single new triple store
+ * and reason over that. The resulting triples are then copied back into the specified
+ * root graph in the main triple store.
+ */
+function reason(rootGraphUri) {
+    // initialize reasoning components
+    const rulesParser = new Parser({ format: mediatypeTextN3 });
+    const rulesStore = new Store(rulesParser.parse(rules));
+    const unionStore = new Store();
+    const reasoner = new Reasoner(unionStore);
+
+    // copy quads from all graphs into the default graph of the union store
+    store.forEach(quad => {
+        unionStore.addQuad(
+            quad.subject, quad.predicate, quad.object, DataFactory.defaultGraph()
+        );
+    });
+
+    // apply reasoning based on the specified inference rules
+    console.info("union-store size before reasoning: " + unionStore.size);
+    reasoner.reason(rulesStore);
+    console.info("union-store size after reasoning: " + unionStore.size);
+
+    // copy the relevant quads back into the specified graph in the main triple store
+    // todo: improve efficiency if necessary
+    const rootGraph = DataFactory.namedNode(rootGraphUri);
+    const rootGraphSubjectIds = store.getSubjects(null, null, rootGraph).map(s => s.id);
+    console.info("store size before copying inferred quads: " + store.size)
+    unionStore.forEach(quad => {
+        if (rootGraphSubjectIds.includes(quad.subject.id)) {
+            if (store.addQuad(quad.subject, quad.predicate, quad.object, rootGraph)) {
+                console.debug(
+                    "inferred statement: %s, %s, %s",
+                    quad.subject.id, quad.predicate.id, quad.object.id
+                );
+            }
+        }
+    });
+    console.info("store size after copying inferred quads: " + store.size)
+}
 
 /** updates all fdp content in the container */
 export function updateFdp(fdpUrl, container) {
@@ -107,14 +151,9 @@ function handleAnchorClicks(event) {
     }
 }
 
-/** todo: make this work (maybe split out the reasoning part because that's only needed once after parsing all prefixes...) */
-function inferRelatedResources() {
-    // apply inference rules to the store (this adds statements)
-    console.info("store size before reasoning: " + store.size);
-    reasoner.reason(rulesStore);
-    console.info("store size after reasoning: " + store.size);
-
-    // todo: this does not work yet... maybe due to different graphs? or mismatch with subject uri trailing slash?
+/** ... */
+function getRelatedResources() {
+    const fdpUrl = prefixes.fdp;
     const children = store.getObjects(
         DataFactory.namedNode(fdpUrl),
         DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
@@ -123,10 +162,7 @@ function inferRelatedResources() {
         DataFactory.namedNode(fdpUrl),
         DataFactory.namedNode("http://purl.org/dc/terms/isPartOf"),
         null);
-    console.log(children)
-    console.log(parents)
-    console.log(store._getGraphs(null))
-
+    return { children, parents };
 }
 
 /** tries to get a human readable label for an iri */
@@ -226,6 +262,7 @@ function createElementSubject(subject) {
 /** populates the html container with rdf statements from the triple store */
 async function populate(containerElement) {
     const fdpUrl = prefixes.fdp;
+
     // get core rdf ontologies
     for (const key of ["fdp-o", "rdf", "rdfs"]) {
         await parseFromUrl(prefixes[key]);
@@ -233,14 +270,16 @@ async function populate(containerElement) {
 
     // wait for all promises to be fulfilled
     if (recursiveParsePromises.length > 0) {
-        console.info("awaiting %d promises", recursiveParsePromises.length);
+        console.debug("awaiting %d promises", recursiveParsePromises.length);
         await Promise.all(recursiveParsePromises);
-        console.info("promises fulfilled");
+        console.debug("promises fulfilled");
     }
+
+    // infer relations etc.
+    reason(prefixes.fdp);
 
     // populates the html page with rdf statements from the store
     console.debug("populate() called for url %s", fdpUrl);
-    console.debug(prefixes);
     store.forSubjects(
         subject => {
             containerElement.appendChild(createElementSubject(subject));
@@ -251,16 +290,6 @@ async function populate(containerElement) {
         // only include subjects from the root fdp graph
         DataFactory.namedNode(fdpUrl),
     );
-
-    // temp (todo: remove, because this was just to show that it does work with the actual predicate, just not with inference yet...)
-    reasoner.reason(rulesStore);
-    console.log(
-        store.getObjects(
-            DataFactory.namedNode(fdpUrl),
-            DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
-            null
-        ).map(o => o.id)
-    )
 }
 
 /**
