@@ -28,10 +28,19 @@ const rules = `
 } => {
   ?subject a ?otherObject .
 } .
+
 # infer subproperty
 {
   ?subject ?predicate ?object .
   ?predicate <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> ?otherPredicate .
+} => {
+  ?subject ?otherPredicate ?object .
+} .
+
+# infer close match property (to handle fdp-o:metadataCatalog...)
+{
+  ?subject ?predicate ?object .
+  ?predicate <http://www.w3.org/2004/02/skos/core#closeMatch> ?otherPredicate .
 } => {
   ?subject ?otherPredicate ?object .
 } .
@@ -248,7 +257,7 @@ async function populate(containerElement) {
     console.log(
         store.getObjects(
             factory.namedNode(fdpUrl),
-            factory.namedNode("https://w3id.org/fdp/fdp-o#metadataCatalog"),
+            factory.namedNode("http://purl.org/dc/terms/hasPart"),
             null
         ).map(o => o.id)
     )
