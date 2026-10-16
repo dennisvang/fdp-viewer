@@ -10,7 +10,6 @@ import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/brows
 
 const mediatypeTextTurtle = "text/turtle";
 const mediatypeTextN3 = "text/n3";
-const factory = DataFactory;
 const parser = new Parser({ format: mediatypeTextTurtle });
 const store = new Store();
 const prefixes = {
@@ -117,12 +116,12 @@ function inferRelatedResources() {
 
     // todo: this does not work yet... maybe due to different graphs? or mismatch with subject uri trailing slash?
     const children = store.getObjects(
-        factory.namedNode(fdpUrl),
-        factory.namedNode("http://purl.org/dc/terms/hasPart"),
+        DataFactory.namedNode(fdpUrl),
+        DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
         null);
     const parents = store.getObjects(
-        factory.namedNode(fdpUrl),
-        factory.namedNode("http://purl.org/dc/terms/isPartOf"),
+        DataFactory.namedNode(fdpUrl),
+        DataFactory.namedNode("http://purl.org/dc/terms/isPartOf"),
         null);
     console.log(children)
     console.log(parents)
@@ -250,15 +249,15 @@ async function populate(containerElement) {
         null,
         null,
         // only include subjects from the root fdp graph
-        factory.namedNode(fdpUrl),
+        DataFactory.namedNode(fdpUrl),
     );
 
     // temp (todo: remove, because this was just to show that it does work with the actual predicate, just not with inference yet...)
     reasoner.reason(rulesStore);
     console.log(
         store.getObjects(
-            factory.namedNode(fdpUrl),
-            factory.namedNode("http://purl.org/dc/terms/hasPart"),
+            DataFactory.namedNode(fdpUrl),
+            DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
             null
         ).map(o => o.id)
     )
@@ -280,9 +279,9 @@ async function parseFromUrl(url, maxDepth, depth) {
             onQuad: (error, quad) => {
                 if (quad) {
                     // use a dedicated graph for each parsed url (each predicate)
-                    const graph = factory.namedNode(url);
+                    const graph = DataFactory.namedNode(url);
                     // todo: can't we just modify the graph on the existing quad?
-                    const newQuad = factory.quad(
+                    const newQuad = DataFactory.quad(
                         quad.subject,
                         quad.predicate,
                         quad.object,
