@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>inference</title>
+</head>
+<body>
+
+<script type="module">
+    // https://github.com/rdfjs/N3.js/ (repo)
+    // https://rdf.js.org/N3.js/ (docs)
+    import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
+
+    // constants
+    const DATA = `
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix fdp-o: <https://w3id.org/fdp/fdp-o#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# copied from fdp-o
+fdp-o:MetadataService
+    a owl:Class ;
+    rdfs:subClassOf dcat:DataService .
+
+# copied from fdp-o
+fdp-o:metadataCatalog
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf owl:topObjectProperty ;
+    skos:closeMatch dcat:catalog .
+
+# dummy fdp metadata (incomplete on purpose)
+<http://localhost:8080>
+  a fdp-o:MetadataService;
+  fdp-o:metadataCatalog <http://localhost:8080/catalog/some-id> .
+`;
+
+    const RULES = `
+# infer subclass
+{
+  ?subject a ?object .
+  ?object <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?otherObject .
+} => {
+  ?subject a ?otherObject .
+} .
+
+# infer subproperty
+{
+  ?subject ?predicate ?object .
+  ?predicate <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> ?otherPredicate .
+} => {
+  ?subject ?otherPredicate ?object .
+} .
+
+# infer close match property
+{
+  ?subject ?predicate ?object .
+  ?predicate <http://www.w3.org/2004/02/skos/core#closeMatch> ?otherPredicate .
+} => {
+  ?subject ?otherPredicate ?object .
+} .
+`;
+
+    // main triple store
+    const parser = new Parser({format: 'text/turtle'});
+    const store = new Store(parser.parse(DATA));
+
+    // configure reasoner for the main triple store
+    const reasoner = new Reasoner(store);
+    const rulesParser = new Parser({format: 'text/n3'});
+    const rulesStore = new Store(rulesParser.parse(RULES));
+
+    // apply reasoning to main triple store
+    console.info("store size before reasoning: " + store.size);
+    reasoner.reason(rulesStore);
+    console.info("store size after reasoning: " + store.size);
+    console.debug(store);
+
+    // show store contents
+    for (let statement of store) {
+        console.info(statement.subject.id, statement.predicate.id, statement.object.id, statement.graph.id)
+    }
+
+    // query store and populate html page with results
+    store.getObjects(
+        DataFactory.namedNode("http://localhost:8080"),
+        DataFactory.namedNode("http://www.w3.org/ns/dcat#catalog"),
+        null,
+    ).forEach(obj => {
+        const div = document.createElement("div");
+        div.innerText = obj.id;
+        document.body.appendChild(div);
+    });
+
+
+</script>
+
+</body>
+</html>
