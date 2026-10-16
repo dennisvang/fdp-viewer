@@ -83,17 +83,19 @@ fdp-o:metadataCatalog
         console.info(statement.subject.id, statement.predicate.id, statement.object.id, statement.graph.id)
     }
 
-    // query store and populate html page with results
-    store.getObjects(
+    // query store for catalogs, using inferred dcat predicate
+    const catalogs = store.getObjects(
         DataFactory.namedNode("http://localhost:8080"),
         DataFactory.namedNode("http://www.w3.org/ns/dcat#catalog"),
         null,
-    ).forEach(obj => {
+    );
+
+    // populate html page with results
+    catalogs.forEach(obj => {
         const div = document.createElement("div");
         div.innerText = obj.id;
         document.body.appendChild(div);
     });
-
 
 </script>
 
