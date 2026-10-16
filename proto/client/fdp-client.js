@@ -16,6 +16,7 @@ const prefixes = {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
 };
+const relatedResourceClass = "related-resource";
 
 // inference rules
 const rules = `
@@ -151,19 +152,23 @@ function handleAnchorClicks(event) {
     }
 }
 
-/** returns URIs of parents and children of the current resource */
-function getRelatedResourceUris(subjectUri) {
+/** returns a set of IRIs representing parents and children of the specified subject */
+function getRelatedResourceIris(subjectIri) {
+    // todo: DRY robust handling of trailing slash again...
+    subjectIri = subjectIri.endsWith("/") ? subjectIri.slice(0, -1) : subjectIri;
+    const subject = DataFactory.namedNode(subjectIri);
     const children = store.getObjects(
-        DataFactory.namedNode(subjectUri),
+        subject,
         DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
         null,
     ).map(c => c.id);
     const parents = store.getObjects(
-        DataFactory.namedNode(subjectUri),
+        subject,
         DataFactory.namedNode("http://purl.org/dc/terms/isPartOf"),
         null,
     ).map(p => p.id);
-    return { children, parents };
+    // unique array of IRIs from parents and children
+    return [... new Set([...children, ...parents])];
 }
 
 /** tries to get a human readable label for an iri */
@@ -218,14 +223,18 @@ function createElementIRI(iri, ...classes) {
     return iriElement;
 }
 
-/** creates an html element to represent an rdf term */
-function createElementTerm(term) {
+/** creates an html element to represent an rdf term (subject, predicate, or object) */
+function createElementTerm(term, relatedResourceIris) {
     let termElement;
     if (term.termType === "Literal") {
         termElement = document.createElement("span");
         termElement.textContent = withPrefixes(term.id);
     } else {
-        termElement = createElementIRI(term.id);
+        const elementClasses = [];
+        if (relatedResourceIris.includes(term.id)) {
+            elementClasses.push(relatedResourceClass);
+        }
+        termElement = createElementIRI(term.id, ...elementClasses);
     }
     termElement.classList.add("rdf-term");
     return termElement;
@@ -235,11 +244,11 @@ function createElementTerm(term) {
  * creates an html element containing a single rdf statement consisting of rdf terms
  * <subject> <predicate> <object>
  */
-function createElementStatement(quad) {
+function createElementStatement(quad, relatedResourceIris) {
     let statementElement = document.createElement("div");
     statementElement.classList.add("rdf-statement");
     for (const termName of ["subject", "predicate", "object"]) {
-        const element = createElementTerm(quad[termName]);
+        const element = createElementTerm(quad[termName], relatedResourceIris);
         element.classList.add("rdf-" + termName);
         statementElement.appendChild(element);
     }
@@ -247,7 +256,7 @@ function createElementStatement(quad) {
 }
 
 /** creates an html element containing all rdf statements for the given rdf subject */
-function createElementSubject(subject) {
+function createElementSubject(subject, relatedResourceIris) {
     console.debug(`createElementSubject() called for ${subject.id}`);
     const subjectElement = document.createElement("div");
     subjectElement.classList.add("subject");
@@ -255,7 +264,7 @@ function createElementSubject(subject) {
     subjectElement.appendChild(createElementTitle(subject.id));
     for (const quad of store.match(subject)) {
         console.debug(quad);
-        subjectElement.appendChild(createElementStatement(quad));
+        subjectElement.appendChild(createElementStatement(quad, relatedResourceIris));
     }
     return subjectElement;
 }
@@ -283,9 +292,13 @@ async function populate(containerElement) {
 
     // populates the html page with rdf statements from the store
     console.debug("populate() called for url %s", fdpUrl);
+    const relatedResourceIris = getRelatedResourceIris(fdpUrl);
     store.forSubjects(
         subject => {
-            containerElement.appendChild(createElementSubject(subject));
+            containerElement.appendChild(
+                // todo: relatedResourceIris are only used several levels down... clean up?
+                createElementSubject(subject, relatedResourceIris)
+            );
             console.info("subject populated: %s", subject.value);
         },
         null,
