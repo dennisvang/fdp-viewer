@@ -261,6 +261,8 @@ function createElementSubject(subject) {
 
 /** populates the html container with rdf statements from the triple store */
 async function populate(containerElement) {
+    // todo: re-implement url argument so we can populate child resources as well
+    // todo: robust handling of trailing slash in fdpUrl and prefixes.fdp
     const fdpUrl = prefixes.fdp;
 
     // get core rdf ontologies
@@ -276,7 +278,7 @@ async function populate(containerElement) {
     }
 
     // infer relations etc.
-    reason(prefixes.fdp);
+    reason(fdpUrl);
 
     // populates the html page with rdf statements from the store
     console.debug("populate() called for url %s", fdpUrl);
