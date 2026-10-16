@@ -226,9 +226,7 @@ function createElementSubject(subject) {
 
 /** populates the html container with rdf statements from the triple store */
 async function populate(containerElement) {
-    // remove trailing slash from fdp url
-    const fdpUrl = prefixes.fdp.endsWith("/") ? prefixes.fdp.slice(0, -1) : prefixes.fdp;
-    console.debug("fdp url: %s", fdpUrl);
+    const fdpUrl = prefixes.fdp;
     // get core rdf ontologies
     for (const key of ["fdp-o", "rdf", "rdfs"]) {
         await parseFromUrl(prefixes[key]);
@@ -246,16 +244,13 @@ async function populate(containerElement) {
     console.debug(prefixes);
     store.forSubjects(
         subject => {
-            // only show subjects matching fdp url
-            console.debug("considering subject for population: %s", subject.id)
-            if (subject.id.startsWith(fdpUrl)) {
-                containerElement.appendChild(createElementSubject(subject));
-                console.info("subject populated: %s", subject.id);
-            }
+            containerElement.appendChild(createElementSubject(subject));
+            console.info("subject populated: %s", subject.value);
         },
         null,
         null,
-        null,
+        // only include subjects from the root fdp graph
+        factory.namedNode(fdpUrl),
     );
 
     // temp (todo: remove, because this was just to show that it does work with the actual predicate, just not with inference yet...)
@@ -284,8 +279,16 @@ async function parseFromUrl(url, maxDepth, depth) {
         parser.parse(ttl, {
             onQuad: (error, quad) => {
                 if (quad) {
-                    store.add(quad);
-                    console.debug("added to store: %s (default graph)", quad.subject.id);
+                    // use a dedicated graph for each parsed url (each predicate)
+                    const graph = factory.namedNode(url);
+                    // todo: can't we just modify the graph on the existing quad?
+                    const newQuad = factory.quad(
+                        quad.subject,
+                        quad.predicate,
+                        quad.object,
+                        graph);
+                    store.add(newQuad);
+                    console.debug("added to store: %s (graph: %s)", newQuad.subject.id, newQuad.graph.id);
                 }
                 if (error) {
                     console.warn("failed to parse quad for %s:\n%s", url, error);
