@@ -12,6 +12,7 @@
     import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
 
     // constants
+    const ROOT_URL = "http://localhost:8080";
     const DATA = `
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
@@ -88,25 +89,41 @@ dcat:catalog
         store.add(DataFactory.quad(quad.subject, quad.predicate, quad.object, graph));
     });
 
-    // configure reasoner for the main triple store
-    const reasoner = new Reasoner(store);
+    // apparently n3.js does not support reasoning over multiple graphs, so we create a union store to reason over,
+    // then add the inferred statements back into the original store
+    const unionStore = new Store();
+    store.forEach(quad => unionStore.addQuad(
+        // force default graph for all statements
+        quad.subject, quad.predicate, quad.object, DataFactory.defaultGraph()
+    ));
+
+    // configure reasoner for the union triple store
+    const reasoner = new Reasoner(unionStore);
     const rulesParser = new Parser({format: 'text/n3'});
     const rulesStore = new Store(rulesParser.parse(RULES));
 
-    // apply reasoning to main triple store
-    console.info("store size before reasoning: " + store.size);
+    // apply reasoning to union triple store
+    console.info("union store size before reasoning: " + unionStore.size);
     reasoner.reason(rulesStore);
-    console.info("store size after reasoning: " + store.size);
-    console.debug(store);
+    console.info("union store size after reasoning: " + unionStore.size);
+    console.debug(unionStore);
 
-    // show store contents
-    for (let statement of store) {
-        console.info(statement.subject.id, statement.predicate.id, statement.object.id, statement.graph.id)
+    // show union store contents
+    for (let quad of unionStore) {
+        console.info(quad.subject.id, quad.predicate.id, quad.object.id, quad.graph.id)
     }
+
+    // copy inferred statements back into main store
+    unionStore.forEach(quad => {
+            if (quad.subject.id.startsWith(ROOT_URL)) {
+                store.addQuad(quad.subject, quad.predicate, quad.object, DataFactory.defaultGraph());
+            }
+        }
+    );
 
     // query store for catalogs, using inferred dcterms predicate
     const catalogs = store.getObjects(
-        DataFactory.namedNode("http://localhost:8080"),
+        DataFactory.namedNode(ROOT_URL),
         DataFactory.namedNode("http://purl.org/dc/terms/hasPart"),
         null,
     );
