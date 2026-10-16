@@ -232,14 +232,16 @@ async function populate(containerElement) {
     // populates the html page with rdf statements from the store
     console.debug("populate() called for url %s", fdpUrl);
     console.debug(prefixes);
-    store.forSubjects(subject => {
+    store.forSubjects(
+        subject => {
             containerElement.appendChild(createElementSubject(subject));
             console.info("subject populated: %s", subject.value);
         },
         null,
         null,
         // only include subjects from the root fdp graph
-        factory.namedNode(fdpUrl));
+        factory.namedNode(fdpUrl),
+    );
 
     // temp (todo: remove, because this was just to show that it does work with the actual predicate, just not with inference yet...)
     reasoner.reason(rulesStore);
