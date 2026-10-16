@@ -142,13 +142,15 @@ function clearFdp(container) {
  */
 function handleAnchorClicks(event) {
     if (event.target.nodeName === "A" && event.target.href.startsWith(prefixes.fdp)) {
-        if (event.target.href.includes("#")) {
+        if (event.target.classList.contains(relatedResourceClass)) {
+            event.preventDefault();
+            console.warn("clicked a related resource: %s", event.target.href);
+            // todo: re-populate with the clicked resource
+        } else if (event.target.href.includes("#")) {
             // cancel external navigation
             event.preventDefault();
+            console.warn("clicked an internal resource URI that does not resolve");
         }
-        // todo: infer all child and parent uris (inferRelatedResources) based on
-        //  dcterms hasPart and isPartOf, then check if the target href matches one of
-        //  those uris and re-populate the container with that resource
     }
 }
 
