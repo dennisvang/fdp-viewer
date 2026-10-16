@@ -262,7 +262,8 @@ async function parseFromUrl(url, maxDepth, depth) {
     }
     const ttl = await getTurtle(url);
     if (ttl) {
-        // parse the turtle content
+        // parse the turtle content (note that the use of parse() callbacks makes this
+        // asynchronous, but we need them so we can recurse when finding a prefix)
         parser.parse(ttl, {
             onQuad: (error, quad) => {
                 if (quad) {
