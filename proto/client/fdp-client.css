@@ -35,6 +35,10 @@ body {
     font-style: italic;
 }
 
+.related-resource {
+    color: coral;
+}
+
 .subject {
     color: white;
     padding: 0.5em;
