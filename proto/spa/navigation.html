@@ -48,15 +48,18 @@
                 url = null;
             }
         }
-        // add the fdp url to the query string for the current location (using set instead of append to prevent multiple)
-        const location = new URL(window.location);
-        location.searchParams.set("fdp", url);
         // trigger navigation event with the updated query, but do not make a new history entry (replace the current one)
-        navigation.navigate(location, {"history": "replace"});
+        navigation.navigate(updateFdpUrlSearchParam(url), {"history": "replace"});
         // return for convenience
         return url;
     }
 
+    /** returns a url with the fdp parameter updated to the specified fdpUrl */
+    function updateFdpUrlSearchParam(fdpUrl) {
+        const location = new URL(window.location);
+        location.searchParams.set("fdp", fdpUrl);
+        return location.href;
+    }
 </script>
 
 </body>
