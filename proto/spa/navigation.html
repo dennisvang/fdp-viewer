@@ -28,7 +28,6 @@
 
     /** returns the value of the fdp query param, assuming this is a url */
     function getFdpUrlFromQuery() {
-        console.debug(window.location);
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
         const url = new URLSearchParams(window.location.search).get(PARAM_FDP);
         // update container
