@@ -31,7 +31,7 @@
         let url;
         while (!url) {
             try {
-                url = window.prompt("please specify a valid fdp url");
+                url = window.prompt("please specify a valid fdp url", "https://fdp.example.org");
                 // validate
                 new URL(url);
             } catch {
