@@ -10,40 +10,36 @@
 <script type="module">
 
     const container = document.getElementById("container");
-    const fdpURl= getFdpUrl();
+    const fdpUrl= getFdpUrl();
 
-    /** returns the renders an input if the url query does not contain a valid fdp url */
+    /** returns a valid fdp url, requesting one from the user if not found in the url query */
     function getFdpUrl() {
-        const queryFdp = getFdpFromQuery();
-        if (!queryFdp) {
-            console.debug("fdp not found in url query")
-            renderFdpUrlInput()
-        }
-        return queryFdp
+        // here we assume that the query param is valid if it exists...
+        return getFdpUrlFromQuery() || getFdpUrlFromUser();
     }
 
     /** returns the value of the fdp query param, assuming this is a url */
-    function getFdpFromQuery() {
+    function getFdpUrlFromQuery() {
         console.debug(window.location);
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
         const searchParams = new URLSearchParams(window.location.search);
         return searchParams.get("fdp");
     }
 
-    /** replaces container content by an input asking for the fdp url */
-    function renderFdpUrlInput() {
-        // clear container
-        container.innerHTML = "";
-        // add label and input to container
-        const label = document.createElement("label");
-        label.innerText = "Specify FDP URL:";
-        const input = document.createElement("input");
-        input.type = "edit";
-        input.addEventListener("change", event => {
-            console.debug("edit changed")
-            // todo: add to current location as url query param
-        });
-        [label, input].forEach(container.appendChild.bind(container));
+    /** returns a valid url from user input prompt */
+    function getFdpUrlFromUser() {
+        let url;
+        while (!url) {
+            try {
+                url = window.prompt("please specify a valid fdp url");
+                // validate
+                new URL(url);
+            } catch {
+                // reset to try again
+                url = null;
+            }
+        }
+        return url
     }
 
 </script>
