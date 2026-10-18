@@ -31,15 +31,21 @@
         let url;
         while (!url) {
             try {
-                url = window.prompt("please specify a valid fdp url", "https://fdp.example.org");
                 // validate
-                new URL(url);
+                url = new URL(window.prompt("please specify a valid fdp url", "https://fdp.example.org")).href;
+                console.debug("valid url entered: %s", url)
             } catch {
                 // reset to try again
                 url = null;
             }
         }
-        return url
+        // add the fdp url to the query string for the current location (using set instead of append to prevent multiple)
+        const location = new URL(window.location);
+        location.searchParams.set("fdp", url);
+        // trigger navigation event with the updated query
+        navigation.navigate(location, {"history": "replace"});
+        // return for convenience
+        return url;
     }
 
 </script>
