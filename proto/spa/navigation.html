@@ -10,6 +10,8 @@
 <script type="module">
 
     const container = document.getElementById("container");
+
+    const PARAM_FDP = "fdp";
     const fdpUrl= getFdpUrl();
 
     /** returns a valid fdp url, requesting one from the user if not found in the url query */
@@ -22,8 +24,10 @@
     function getFdpUrlFromQuery() {
         console.debug(window.location);
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
-        const searchParams = new URLSearchParams(window.location.search);
-        return searchParams.get("fdp");
+        const url = new URLSearchParams(window.location.search).get(PARAM_FDP);
+        // update container
+        container.innerText = url;
+        return url;
     }
 
     /** returns a valid url from user input prompt */
