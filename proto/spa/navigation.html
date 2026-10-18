@@ -23,11 +23,11 @@
     /** returns a valid fdp url, requesting one from the user if not found in the url query */
     function getFdpUrl() {
         // here we assume that the query param is valid if it exists...
-        return getFdpUrlFromQuery() || getFdpUrlFromUser();
+        return getFdpUrlFromSearchParam() || getFdpUrlFromUser();
     }
 
     /** returns the value of the fdp query param, assuming this is a url */
-    function getFdpUrlFromQuery() {
+    function getFdpUrlFromSearchParam() {
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
         const url = new URLSearchParams(window.location.search).get(PARAM_FDP);
         // update container
