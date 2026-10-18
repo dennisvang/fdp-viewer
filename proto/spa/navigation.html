@@ -9,9 +9,15 @@
 
 <script type="module">
 
+    const PARAM_FDP = "fdp";
+
     const container = document.getElementById("container");
 
-    const PARAM_FDP = "fdp";
+    // listen for navigation events
+    navigation.addEventListener("navigate", (event) => {
+        console.warn("nav event detected: %s, %s", event.navigationType, event.destination.url)
+    });
+
     const fdpUrl= getFdpUrl();
 
     /** returns a valid fdp url, requesting one from the user if not found in the url query */
