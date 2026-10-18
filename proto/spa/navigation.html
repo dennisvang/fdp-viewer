@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>navigation api</title>
+</head>
+<body>
+<div id="container"></div>
+
+<script type="module">
+
+    const container = document.getElementById("container");
+    const fdpURl= getFdpUrl();
+
+    /** returns the renders an input if the url query does not contain a valid fdp url */
+    function getFdpUrl() {
+        const queryFdp = getFdpFromQuery();
+        if (!queryFdp) {
+            console.debug("fdp not found in url query")
+            renderFdpUrlInput()
+        }
+        return queryFdp
+    }
+
+    /** returns the value of the fdp query param, assuming this is a url */
+    function getFdpFromQuery() {
+        console.debug(window.location);
+        // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
+        const searchParams = new URLSearchParams(window.location.search);
+        return searchParams.get("fdp");
+    }
+
+    /** replaces container content by an input asking for the fdp url */
+    function renderFdpUrlInput() {
+        // clear container
+        container.innerHTML = "";
+        // add label and input to container
+        const label = document.createElement("label");
+        label.innerText = "Specify FDP URL:";
+        const input = document.createElement("input");
+        input.type = "edit";
+        input.addEventListener("change", event => {
+            console.debug("edit changed")
+            // todo: add to current location as url query param
+        });
+        [label, input].forEach(container.appendChild.bind(container));
+    }
+
+</script>
+
+</body>
+</html>
