@@ -48,7 +48,7 @@
         const anchor = document.createElement("a");
         // todo: remove the "internal" arg and simply check if the url starts with the fdp root url
         if (internal) {
-            anchor.href = updateFdpUrlSearchParam(url);
+            anchor.href = getLocationHrefWithSearchParam(url);
         } else {
             anchor.href = url;
             anchor.target = "_blank";
@@ -84,15 +84,15 @@
             }
         }
         // trigger navigation event with the updated query, but do not make a new history entry (replace the current one)
-        navigation.navigate(updateFdpUrlSearchParam(url), {"history": "replace"});
+        navigation.navigate(getLocationHrefWithSearchParam(url), {"history": "replace"});
         // return for convenience
         return url;
     }
 
     /** returns a url with the fdp parameter updated to the specified fdpUrl */
-    function updateFdpUrlSearchParam(fdpUrl) {
+    function getLocationHrefWithSearchParam(fdpUrl) {
         const location = new URL(window.location);
-        location.searchParams.set("fdp", fdpUrl);
+        location.searchParams.set(PARAM_FDP, fdpUrl);
         return location.href;
     }
 </script>
