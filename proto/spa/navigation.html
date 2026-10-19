@@ -22,7 +22,7 @@
     // run the main function
     main();
 
-    /** renders mock page content based on the fdp url */
+    /** renders mock page content based on the resource-url */
     function main() {
         // get url however we can
         const resourceUrl = getResourceUrl();
@@ -43,7 +43,7 @@
         );
     }
 
-    /** returns true if the url is an internal fdp resource */
+    /** returns true if the url represents an internal fdp resource */
     function isInternal(url) {
         return url.startsWith(MOCK_FDP_URL);
     }
@@ -53,7 +53,7 @@
         const div = document.createElement("div");
         const anchor = document.createElement("a");
         if (isInternal(url)) {
-            anchor.href = getLocationHrefWithSearchParam(url);
+            anchor.href = getLocationHrefWithResourceUrl(url);
         } else {
             anchor.href = url;
             anchor.target = "_blank";
@@ -65,14 +65,20 @@
 
     /** returns a valid resource url, requesting one from the user if not found in the url query */
     function getResourceUrl() {
-        // here we assume that the fdp query param is a valid url if it exists...
-        return getResourceUrlFromSearchParam() || getResourceUrlFromUser();
+        // here we assume that the resource-url query param is a valid url if it exists...
+        return getResourceUrlFromSearchParams() || getResourceUrlFromUser();
     }
 
-    /** returns the value of the fdp query param, assuming this is a url */
-    function getResourceUrlFromSearchParam() {
+    /**
+     * returns the value of the resource-url query param from the specified href (assuming this is a url)
+     * falls back on window.location.href if href is not specified
+     */
+    function getResourceUrlFromSearchParams(href) {
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
-        return new URLSearchParams(window.location.search).get(PARAM_RESOURCE_URL);
+        if (!href) {
+            href = window.location.href;
+        }
+        return new URL(href).searchParams.get(PARAM_RESOURCE_URL);
     }
 
     /** returns a valid url from user input prompt */
@@ -89,13 +95,13 @@
             }
         }
         // trigger navigation event with the updated query, but do not make a new history entry (replace the current one)
-        navigation.navigate(getLocationHrefWithSearchParam(url), {"history": "replace"});
+        navigation.navigate(getLocationHrefWithResourceUrl(url), {"history": "replace"});
         // return for convenience
         return url;
     }
 
-    /** returns a url with the fdp parameter updated to the specified resourceUrl */
-    function getLocationHrefWithSearchParam(resourceUrl) {
+    /** returns a url with the resource-url parameter updated to the specified resourceUrl */
+    function getLocationHrefWithResourceUrl(resourceUrl) {
         const location = new URL(window.location);
         location.searchParams.set(PARAM_RESOURCE_URL, resourceUrl);
         return location.href;
