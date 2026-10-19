@@ -24,9 +24,12 @@
 
     /** renders mock page content based on the resource-url */
     function main() {
-        // get url however we can
-        const resourceUrl = getResourceUrl();
-        // mock routing
+        mockUpdateContent(getResourceUrl());
+    }
+
+    /** updates page content with mock data based on specified resource-url */
+    function mockUpdateContent(resourceUrl) {
+        // mock routing/fetch/parse
         const rootUrl = MOCK_FDP_URL;
         const catalogUrl = rootUrl + "/catalog/1";
         const externalUrl = "https://other.example.org"
