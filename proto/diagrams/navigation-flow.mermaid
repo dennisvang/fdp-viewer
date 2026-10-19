@@ -1,0 +1,20 @@
+flowchart TB
+  load@{shape: rect, label: "page load"}
+  param@{shape: diam, label: "has resource<br>url param?"}
+  input@{shape: rect, label: "get url<br>from user"}
+  urlValid@{shape: diam, label: "valid url?"}
+  updateLocation@{shape: rect, label: "add url param<br>to location"}
+  fetch@{shape: rect, label: "fetch resource<br>from url param"}
+  parseRdf@{shape: rect, label: "parse RDF"}
+  updatePage@{shape: rect, label: "update<br>page content"}
+
+  load -- location --> param
+  param -- (yes)<br>location --> fetch
+  fetch -- RDF --> parseRdf
+  parseRdf -- HTML elements --> updatePage
+  param -- (no) --> input
+  input -- url --> urlValid
+  urlValid -- (yes)<br>url --> updateLocation
+  updateLocation -- updated<br>location --> load
+  urlValid -- (no) --> input
+
