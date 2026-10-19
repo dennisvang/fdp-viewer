@@ -18,11 +18,49 @@
         console.warn("nav event detected: %s, %s", event.navigationType, event.destination.url)
     });
 
-    const fdpUrl= getFdpUrl();
+    // run the main function
+    main();
+
+    /** renders mock page content based on the fdp url */
+    function main() {
+        // get url however we can
+        const resourceUrl = getFdpUrl();
+        // mock routing
+        const rootUrl = "https://fdp.example.org";
+        const catalogUrl = rootUrl + "/catalog/1";
+        const externalUrl = "https://other.example.org"
+        let internalUrl = "no url";
+        if ([rootUrl, rootUrl + "/"].includes(resourceUrl)) {
+            internalUrl = catalogUrl;
+        } else if (resourceUrl === catalogUrl) {
+            internalUrl = rootUrl;
+        }
+        // replace content
+        container.replaceChildren(
+            createAnchorDiv(internalUrl, true),
+            createAnchorDiv(externalUrl),
+        );
+    }
+
+    /** creates an anchor element, wrapped in a div, that distinguishes between internal and external urls */
+    function createAnchorDiv(url, internal) {
+        const div = document.createElement("div");
+        const anchor = document.createElement("a");
+        // todo: remove the "internal" arg and simply check if the url starts with the fdp root url
+        if (internal) {
+            anchor.href = updateFdpUrlSearchParam(url);
+        } else {
+            anchor.href = url;
+            anchor.target = "_blank";
+        }
+        anchor.textContent = url;
+        div.appendChild(anchor);
+        return div;
+    }
 
     /** returns a valid fdp url, requesting one from the user if not found in the url query */
     function getFdpUrl() {
-        // here we assume that the query param is valid if it exists...
+        // here we assume that the fdp query param is a valid url if it exists...
         return getFdpUrlFromSearchParam() || getFdpUrlFromUser();
     }
 
