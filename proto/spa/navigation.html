@@ -17,6 +17,14 @@
     // listen for navigation events
     navigation.addEventListener("navigate", (event) => {
         console.warn("nav event detected: %s, %s", event.navigationType, event.destination.url)
+        // only same-origin navigation is handled here, which implies an internal resource-url param is available
+        event.intercept({
+            async handler() {
+                console.debug("intercepted navigation to %s", event.destination.url)
+                // at this point the url has already changed, so the resource-url can be obtained from that
+                mockUpdateContent(getResourceUrl());
+            }
+        });
     });
 
     // run the main function
