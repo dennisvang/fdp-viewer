@@ -44,8 +44,8 @@ export class ResourceViewer {
         subjectElement.classList.add("subject");
         subjectElement.id = subject.id;
         subjectElement.appendChild(this.#createElementTitle(subject.id));
-        this.#rdfStore.forEachResourceSubjectQuad(url, subject, quad => {
-            subjectElement.appendChild(this.#createElementForStatement(quad))
+        this.#rdfStore.getQuadsForGraphSubject(url, subject).forEach(quad => {
+            subjectElement.appendChild(this.#createElementForStatement(quad));
         });
         return subjectElement;
     }
@@ -58,7 +58,7 @@ export class ResourceViewer {
         // clear
         this.#container.replaceChildren();
         // iterate over all rdf subjects from the graph for the specified resource url
-        this.#rdfStore.forEachResourceSubject(url, subject => {
+        this.#rdfStore.getSubjectsForGraph(url).forEach(subject => {
             this.#container.appendChild(this.#createElementForSubject(url, subject));
         });
     }
