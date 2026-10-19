@@ -38,17 +38,21 @@
         }
         // replace content
         container.replaceChildren(
-            createAnchorDiv(internalUrl, true),
+            createAnchorDiv(internalUrl),
             createAnchorDiv(externalUrl),
         );
     }
 
+    /** returns true if the url is an internal fdp resource */
+    function isInternal(url) {
+        return url.startsWith(MOCK_FDP_URL);
+    }
+
     /** creates an anchor element, wrapped in a div, that distinguishes between internal and external urls */
-    function createAnchorDiv(url, internal) {
+    function createAnchorDiv(url) {
         const div = document.createElement("div");
         const anchor = document.createElement("a");
-        // todo: remove the "internal" arg and simply check if the url starts with the fdp root url
-        if (internal) {
+        if (isInternal(url)) {
             anchor.href = getLocationHrefWithSearchParam(url);
         } else {
             anchor.href = url;
