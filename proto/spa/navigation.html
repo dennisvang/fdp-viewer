@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>navigation api</title>
+</head>
+<body>
+<div id="container"></div>
+
+<script type="module">
+
+    const MOCK_FDP_URL = "https://fdp.example.org";
+    const PARAM_RESOURCE_URL = "resource-url";
+
+    const container = document.getElementById("container");
+
+    // listen for navigation events
+    navigation.addEventListener("navigate", (event) => {
+        console.warn("nav event detected: %s, %s", event.navigationType, event.destination.url)
+        // only same-origin navigation is handled here, which implies an internal resource-url param is available
+        event.intercept({
+            async handler() {
+                console.debug("intercepted navigation to %s", event.destination.url)
+                // at this point the url has already changed, so the resource-url can be obtained from that
+                mockUpdateContent(getResourceUrl());
+            }
+        });
+    });
+
+    // run the main function
+    main();
+
+    /** renders mock page content based on the resource-url */
+    function main() {
+        mockUpdateContent(getResourceUrl());
+    }
+
+    /** updates page content with mock data based on specified resource-url */
+    function mockUpdateContent(resourceUrl) {
+        // mock routing/fetch/parse
+        const rootUrl = MOCK_FDP_URL;
+        const catalogUrl = rootUrl + "/catalog/1";
+        const externalUrl = "https://other.example.org"
+        let internalUrl = "no url";
+        if ([rootUrl, rootUrl + "/"].includes(resourceUrl)) {
+            internalUrl = catalogUrl;
+        } else if (resourceUrl === catalogUrl) {
+            internalUrl = rootUrl;
+        }
+        // replace content
+        container.replaceChildren(
+            createAnchorDiv(internalUrl),
+            createAnchorDiv(externalUrl),
+        );
+    }
+
+    /** returns true if the url represents an internal fdp resource */
+    function isInternal(url) {
+        return url.startsWith(MOCK_FDP_URL);
+    }
+
+    /** creates an anchor element, wrapped in a div, that distinguishes between internal and external urls */
+    function createAnchorDiv(url) {
+        const div = document.createElement("div");
+        const anchor = document.createElement("a");
+        if (isInternal(url)) {
+            anchor.href = getLocationHrefWithResourceUrl(url);
+        } else {
+            anchor.href = url;
+            anchor.target = "_blank";
+        }
+        anchor.textContent = url;
+        div.appendChild(anchor);
+        return div;
+    }
+
+    /** returns a valid resource url, requesting one from the user if not found in the url query */
+    function getResourceUrl() {
+        // here we assume that the resource-url query param is a valid url if it exists...
+        return getResourceUrlFromSearchParams() || getResourceUrlFromUser();
+    }
+
+    /**
+     * returns the value of the resource-url query param from the specified href (assuming this is a url)
+     * falls back on window.location.href if href is not specified
+     */
+    function getResourceUrlFromSearchParams(href) {
+        // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
+        if (!href) {
+            href = window.location.href;
+        }
+        return new URL(href).searchParams.get(PARAM_RESOURCE_URL);
+    }
+
+    /** returns a valid url from user input prompt */
+    function getResourceUrlFromUser() {
+        let url;
+        while (!url) {
+            try {
+                // validate
+                url = new URL(window.prompt("please specify a valid fdp url", MOCK_FDP_URL)).href;
+                console.debug("valid url entered: %s", url)
+            } catch {
+                // reset to try again
+                url = null;
+            }
+        }
+        // trigger navigation event with the updated query, but do not make a new history entry (replace the current one)
+        navigation.navigate(getLocationHrefWithResourceUrl(url), {"history": "replace"});
+        // return for convenience
+        return url;
+    }
+
+    /** returns a url with the resource-url parameter updated to the specified resourceUrl */
+    function getLocationHrefWithResourceUrl(resourceUrl) {
+        const location = new URL(window.location);
+        location.searchParams.set(PARAM_RESOURCE_URL, resourceUrl);
+        return location.href;
+    }
+</script>
+
+</body>
+</html>
