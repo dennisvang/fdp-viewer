@@ -1,0 +1,25 @@
+a {
+    color: white;
+    text-decoration-line: none;
+}
+
+body {
+    background-color: white;
+    font-family: monospace;
+    font-size: 10pt;
+}
+
+#content {
+    display: grid;
+    grid-gap: 0.5em;
+}
+
+#controls {
+    display: flex;
+    gap: 0.5em;
+    padding-bottom: 1em;
+}
+
+#input-url {
+    flex-grow: 1;
+}
