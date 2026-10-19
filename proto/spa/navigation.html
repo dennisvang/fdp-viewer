@@ -9,6 +9,7 @@
 
 <script type="module">
 
+    const MOCK_FDP_URL = "https://fdp.example.org";
     const PARAM_FDP = "fdp";
 
     const container = document.getElementById("container");
@@ -26,7 +27,7 @@
         // get url however we can
         const resourceUrl = getFdpUrl();
         // mock routing
-        const rootUrl = "https://fdp.example.org";
+        const rootUrl = MOCK_FDP_URL;
         const catalogUrl = rootUrl + "/catalog/1";
         const externalUrl = "https://other.example.org"
         let internalUrl = "no url";
@@ -76,7 +77,7 @@
         while (!url) {
             try {
                 // validate
-                url = new URL(window.prompt("please specify a valid fdp url", "https://fdp.example.org")).href;
+                url = new URL(window.prompt("please specify a valid fdp url", MOCK_FDP_URL)).href;
                 console.debug("valid url entered: %s", url)
             } catch {
                 // reset to try again
