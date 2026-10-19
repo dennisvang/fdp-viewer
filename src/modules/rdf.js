@@ -53,4 +53,16 @@ export class RdfStore {
         const resourceGraph = DataFactory.namedNode(resourceUri);
         this.#store.forSubjects(subjectCallback, null, null, resourceGraph);
     }
+
+    /**
+     * Applies the specified callback to all RDF quads (statements) matching the
+     * specified subject in the resource's graph. The callback must accept a single RDF
+     * quad, e.g. (quad) => { ... }.
+     */
+    forEachResourceSubjectQuad(resourceUri, subject, quadCallback) {
+        const resourceGraph = DataFactory.namedNode(resourceUri);
+        for (const quad of this.#store.match(subject, null, null, resourceGraph)) {
+            quadCallback(quad);
+        }
+    }
 }

@@ -9,6 +9,17 @@ body {
     font-size: 10pt;
 }
 
+.subject {
+    color: white;
+    padding: 0.5em;
+    background-color: darkblue;
+    border-radius: 0.5em;
+}
+
+.subject .rdf-subject {
+    display: none;
+}
+
 #content {
     display: grid;
     grid-gap: 0.5em;

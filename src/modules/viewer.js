@@ -25,12 +25,29 @@ export class ResourceViewer {
     }
 
     /** (WIP) */
-    #createElementSubject(rdfSubject) {
-        console.debug("creating element for rdf subject %s", rdfSubject.id)
-        // temporary
-        const div = document.createElement("div");
-        div.textContent = rdfSubject.id;
-        return div;
+    #createElementTitle(title) {
+        // temp
+        return document.createElement("div");
+    }
+
+    /** (WIP) */
+    #createElementForStatement(quad) {
+        // temp
+        return document.createElement("div");
+    }
+
+    /**
+     * Creates an HTML element containing all RDF statements for the given RDF subject
+     */
+    #createElementForSubject(url, subject) {
+        const subjectElement = document.createElement("div");
+        subjectElement.classList.add("subject");
+        subjectElement.id = subject.id;
+        subjectElement.appendChild(this.#createElementTitle(subject.id));
+        this.#rdfStore.forEachResourceSubjectQuad(url, subject, quad => {
+            subjectElement.appendChild(this.#createElementForStatement(quad))
+        });
+        return subjectElement;
     }
 
     /**
@@ -42,7 +59,7 @@ export class ResourceViewer {
         this.#container.replaceChildren();
         // iterate over all rdf subjects from the graph for the specified resource url
         this.#rdfStore.forEachResourceSubject(url, subject => {
-            this.#container.appendChild(this.#createElementSubject(subject));
+            this.#container.appendChild(this.#createElementForSubject(url, subject));
         });
     }
 
