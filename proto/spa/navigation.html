@@ -67,10 +67,7 @@
     /** returns the value of the fdp query param, assuming this is a url */
     function getFdpUrlFromSearchParam() {
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
-        const url = new URLSearchParams(window.location.search).get(PARAM_FDP);
-        // update container
-        container.innerText = url;
-        return url;
+        return new URLSearchParams(window.location.search).get(PARAM_FDP);
     }
 
     /** returns a valid url from user input prompt */
