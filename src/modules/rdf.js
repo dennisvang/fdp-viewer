@@ -58,4 +58,14 @@ export class RdfStore {
     getQuadsForGraphSubject(graphUri, subject) {
         return this.#store.match(subject, null, null, DataFactory.namedNode(graphUri));
     }
+
+    /** Returns all RDF objects matching the subject and predicate, from all graphs */
+    getObjectsForSubjectAndPredicate(subject, predicate) {
+        return this.#store.getObjects(subject, predicate, null);
+    }
+
+    /** Returns known prefixes (populated via parser) */
+    getPrefixes() {
+        return this.#prefixes;
+    }
 }

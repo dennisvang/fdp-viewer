@@ -1,16 +1,25 @@
 import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
 
+const CLASS_RDF_STATEMENT = "rdf-statement";
+const CLASS_RELATED_RESOURCE = "related-resource";
+const CLASS_SUBJECT = "subject";
+const CLASS_SUBJECT_TITLE = "subject-title";
+const CLASS_TITLE = "title";
+
 /** Maintains resource viewer state */
 export class ResourceViewer {
     // private elements
     #container;
     #rdfStore;
+    #relatedResourceIris;
     #rootUrl;
 
     constructor(container, rootUrl) {
         this.#container = container;
-        this.#rootUrl = rootUrl;
         this.#rdfStore = new RdfStore();
+        // todo: populate #relatedResourceIris
+        this.#relatedResourceIris = [];
+        this.#rootUrl = rootUrl;
         console.debug("viewer created for %s", this.#rootUrl)
     }
 
@@ -24,16 +33,100 @@ export class ResourceViewer {
         await this.#populate(resourceUrl);
     }
 
-    /** (WIP) */
-    #createElementTitle(title) {
-        // temp
-        return document.createElement("div");
+    /** Replaces IRIs with corresponding prefixes */
+    #withPrefixes(value) {
+        for (const [prefix, prefixIRI] of Object.entries(this.#rdfStore.getPrefixes())) {
+            console.debug(value, prefix, prefixIRI)
+            value = value.replace(prefixIRI, prefix + ":");
+        }
+        return value;
     }
 
-    /** (WIP) */
+    /** Tries to get a human readable label for an IRI */
+    #getLabel(iri, language="en") {
+        // default to prefix substitution
+        let label = this.#withPrefixes(iri);
+        // try to get actual label for iri
+        // todo: do we need to cache this? or is that premature optimization?
+        const labels = this.#rdfStore.getObjectsForSubjectAndPredicate(
+            iri, "http://www.w3.org/2000/01/rdf-schema#label"
+        );
+        const languageTag = "@" + language;
+        for (const labelCandidate of labels) {
+            console.debug("found label candidate: %s", labelCandidate.id);
+            if (labelCandidate.id.endsWith(languageTag) || !labelCandidate.id.includes("@")) {
+                label = labelCandidate.id.replaceAll("\"", "").replaceAll(languageTag, "");
+                console.debug("found label for %s: %s (language: %s)", iri, label, language);
+                // break on first match
+                break;
+            }
+        }
+        // if all else fails, fall back on iri representation
+        if (label === iri) {
+            label = `<${iri}>`;
+        }
+        return label;
+    }
+
+    /**
+     * Creates a clickable HTML element for an IRI. Human readable link text is obtained
+     * from RDF statements if available. Known prefixes are substituted in the element
+     * title which appears on mouse-hover, for improved readability.
+     */
+    #createElementIRI(iri, ...classes) {
+        const iriElement = document.createElement("a");
+        iriElement.href = iri;
+        // open in new tab
+        iriElement.target = "_blank";
+        iriElement.textContent = this.#getLabel(iri);
+        iriElement.title = this.#withPrefixes(iri);
+        if (classes && classes.length) {
+            iriElement.classList.add(classes);
+        }
+        return iriElement;
+    }
+
+    /** Creates an HTML element for a fancy clickable title */
+    #createElementForSubjectTitle(iri) {
+        const titleElement = document.createElement("div");
+        titleElement.classList.add(CLASS_TITLE);
+        titleElement.appendChild(this.#createElementIRI(iri, CLASS_SUBJECT_TITLE));
+        return titleElement;
+    }
+
+    /**
+     * Creates an HTML element representing an RDF term (subject, predicate, or object)
+     */
+    #createElementForTerm(term) {
+        let termElement;
+        if (term.termType === "Literal") {
+            termElement = document.createElement("span");
+            termElement.textContent = this.#withPrefixes(term.id);
+        } else {
+            const elementClasses = [];
+            if (this.#relatedResourceIris.includes(term.id)) {
+                elementClasses.push(CLASS_RELATED_RESOURCE);
+                // todo: the iri should now become a same-origin iri with the term.id as url param, for "internal" navigation
+            }
+            termElement = this.#createElementIRI(term.id, ...elementClasses);
+        }
+        termElement.classList.add("rdf-term");
+        return termElement;
+    }
+
+    /**
+     * Creates an HTML element containing a single RDF statement,
+     * consisting of RDF terms <subject> <predicate> <object>.
+     */
     #createElementForStatement(quad) {
-        // temp
-        return document.createElement("div");
+        let statementElement = document.createElement("div");
+        statementElement.classList.add(CLASS_RDF_STATEMENT);
+        for (const termName of ["subject", "predicate", "object"]) {
+            const element = this.#createElementForTerm(quad[termName]);
+            element.classList.add("rdf-" + termName);
+            statementElement.appendChild(element);
+        }
+        return statementElement;
     }
 
     /**
@@ -41,10 +134,11 @@ export class ResourceViewer {
      */
     #createElementForSubject(url, subject) {
         const subjectElement = document.createElement("div");
-        subjectElement.classList.add("subject");
+        subjectElement.classList.add(CLASS_SUBJECT);
         subjectElement.id = subject.id;
-        subjectElement.appendChild(this.#createElementTitle(subject.id));
+        subjectElement.appendChild(this.#createElementForSubjectTitle(subject.id));
         this.#rdfStore.getQuadsForGraphSubject(url, subject).forEach(quad => {
+            console.debug("populating subject quad %s", quad.predicate.id)
             subjectElement.appendChild(this.#createElementForStatement(quad));
         });
         return subjectElement;
@@ -59,6 +153,7 @@ export class ResourceViewer {
         this.#container.replaceChildren();
         // iterate over all rdf subjects from the graph for the specified resource url
         this.#rdfStore.getSubjectsForGraph(url).forEach(subject => {
+            console.debug("populating subject %s", subject.id)
             this.#container.appendChild(this.#createElementForSubject(url, subject));
         });
     }
