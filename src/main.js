@@ -8,8 +8,8 @@ const inputUrl = document.getElementById("input-url");
 inputUrl.addEventListener("change", async (event) => {
     const container = document.getElementById("content");
     viewer = new ResourceViewer(container, event.target.value);
-    // (WIP)
-    await viewer.init();
+    // initialize with root url
+    await viewer.update();
 });
 
 // initialize
