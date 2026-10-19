@@ -10,7 +10,7 @@
 <script type="module">
 
     const MOCK_FDP_URL = "https://fdp.example.org";
-    const PARAM_FDP = "fdp";
+    const PARAM_RESOURCE_URL = "resource-url";
 
     const container = document.getElementById("container");
 
@@ -25,7 +25,7 @@
     /** renders mock page content based on the fdp url */
     function main() {
         // get url however we can
-        const resourceUrl = getFdpUrl();
+        const resourceUrl = getResourceUrl();
         // mock routing
         const rootUrl = MOCK_FDP_URL;
         const catalogUrl = rootUrl + "/catalog/1";
@@ -63,20 +63,20 @@
         return div;
     }
 
-    /** returns a valid fdp url, requesting one from the user if not found in the url query */
-    function getFdpUrl() {
+    /** returns a valid resource url, requesting one from the user if not found in the url query */
+    function getResourceUrl() {
         // here we assume that the fdp query param is a valid url if it exists...
-        return getFdpUrlFromSearchParam() || getFdpUrlFromUser();
+        return getResourceUrlFromSearchParam() || getResourceUrlFromUser();
     }
 
     /** returns the value of the fdp query param, assuming this is a url */
-    function getFdpUrlFromSearchParam() {
+    function getResourceUrlFromSearchParam() {
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams#parsing_window.location
-        return new URLSearchParams(window.location.search).get(PARAM_FDP);
+        return new URLSearchParams(window.location.search).get(PARAM_RESOURCE_URL);
     }
 
     /** returns a valid url from user input prompt */
-    function getFdpUrlFromUser() {
+    function getResourceUrlFromUser() {
         let url;
         while (!url) {
             try {
@@ -94,10 +94,10 @@
         return url;
     }
 
-    /** returns a url with the fdp parameter updated to the specified fdpUrl */
-    function getLocationHrefWithSearchParam(fdpUrl) {
+    /** returns a url with the fdp parameter updated to the specified resourceUrl */
+    function getLocationHrefWithSearchParam(resourceUrl) {
         const location = new URL(window.location);
-        location.searchParams.set(PARAM_FDP, fdpUrl);
+        location.searchParams.set(PARAM_RESOURCE_URL, resourceUrl);
         return location.href;
     }
 </script>
