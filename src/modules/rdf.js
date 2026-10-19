@@ -44,4 +44,13 @@ export class RdfStore {
             },
         });
     }
+
+    /**
+     * Applies the specified callback to all RDF subjects in the resource's graph.
+     * The callback must accept a single RDF subject, e.g. (subject) => { ... }.
+     */
+    forEachResourceSubject(resourceUri, subjectCallback) {
+        const resourceGraph = DataFactory.namedNode(resourceUri);
+        this.#store.forSubjects(subjectCallback, null, null, resourceGraph);
+    }
 }

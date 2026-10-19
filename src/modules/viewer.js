@@ -20,6 +20,30 @@ export class ResourceViewer {
         const resourceUrl = url ? url : this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
+        // populate the content container based on the harvested resource
+        await this.#populate(resourceUrl);
+    }
+
+    /** (WIP) */
+    #createElementSubject(rdfSubject) {
+        console.debug("creating element for rdf subject %s", rdfSubject.id)
+        // temporary
+        const div = document.createElement("div");
+        div.textContent = rdfSubject.id;
+        return div;
+    }
+
+    /**
+     * Populates the content container based on statements from the RDF store about
+     * the specified resource. The container is cleared first.
+     */
+    async #populate(url) {
+        // clear
+        this.#container.replaceChildren();
+        // iterate over all rdf subjects from the graph for the specified resource url
+        this.#rdfStore.forEachResourceSubject(url, subject => {
+            this.#container.appendChild(this.#createElementSubject(subject));
+        });
     }
 
     /**
