@@ -24,10 +24,12 @@ export class ResourceViewer {
 
     /**
      * Updates the RdfStore based on the RDF turtle representation harvested from the
-     * specified URL. Each resource representation is stored in its own graph.
+     * specified URL. Each resource representation is stored in its own graph,
+     * identified by the resource url.
      */
     async #harvest(url) {
         const turtle = await this.#requestTurtle(url);
+        // todo: only call parseTurtle if the url is not in the rdf store yet
         await this.#rdfStore.parseTurtle(turtle, url);
     }
 
