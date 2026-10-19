@@ -36,7 +36,6 @@ export class ResourceViewer {
     /** Replaces IRIs with corresponding prefixes */
     #withPrefixes(value) {
         for (const [prefix, prefixIRI] of Object.entries(this.#rdfStore.getPrefixes())) {
-            console.debug(value, prefix, prefixIRI)
             value = value.replace(prefixIRI, prefix + ":");
         }
         return value;
@@ -53,10 +52,8 @@ export class ResourceViewer {
         );
         const languageTag = "@" + language;
         for (const labelCandidate of labels) {
-            console.debug("found label candidate: %s", labelCandidate.id);
             if (labelCandidate.id.endsWith(languageTag) || !labelCandidate.id.includes("@")) {
                 label = labelCandidate.id.replaceAll("\"", "").replaceAll(languageTag, "");
-                console.debug("found label for %s: %s (language: %s)", iri, label, language);
                 // break on first match
                 break;
             }
@@ -138,7 +135,6 @@ export class ResourceViewer {
         subjectElement.id = subject.id;
         subjectElement.appendChild(this.#createElementForSubjectTitle(subject.id));
         this.#rdfStore.getQuadsForGraphSubject(url, subject).forEach(quad => {
-            console.debug("populating subject quad %s", quad.predicate.id)
             subjectElement.appendChild(this.#createElementForStatement(quad));
         });
         return subjectElement;
@@ -153,7 +149,6 @@ export class ResourceViewer {
         this.#container.replaceChildren();
         // iterate over all rdf subjects from the graph for the specified resource url
         this.#rdfStore.getSubjectsForGraph(url).forEach(subject => {
-            console.debug("populating subject %s", subject.id)
             this.#container.appendChild(this.#createElementForSubject(url, subject));
         });
     }
