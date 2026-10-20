@@ -4,6 +4,8 @@
 
 import { DataFactory, Parser, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
 
+const DCTERMS_HAS_PART = "http://purl.org/dc/terms/hasPart";
+const DCTERMS_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
 export const MEDIATYPE_TURTLE = "text/turtle";
 
 /** Maintains rdf store state */
@@ -43,6 +45,26 @@ export class RdfStore {
                 this.#prefixes[prefix] = iri.id;
             },
         });
+    }
+
+    /**
+     * Returns an array of IRIs representing parents and children of the specified
+     * RDF subject.
+     */
+    getRelatedResourceIris(subjectIri) {
+        const subject = DataFactory.namedNode(subjectIri);
+        const children = store.getObjects(
+            subject,
+            DataFactory.namedNode(DCTERMS_HAS_PART),
+            null,
+        ).map(c => c.id);
+        const parents = store.getObjects(
+            subject,
+            DataFactory.namedNode(DCTERMS_IS_PART_OF),
+            null,
+        ).map(p => p.id);
+        // unique array of IRIs from parents and children
+        return [... new Set([...children, ...parents])];
     }
 
     /**
