@@ -16,10 +16,10 @@ export class ResourceViewer {
 
     constructor(container, rootUrl) {
         this.#container = container;
-        this.#rdfStore = new RdfStore();
-        // todo: populate #relatedResourceIris
-        this.#relatedResourceIris = [];
         this.#rootUrl = rootUrl;
+        // initialize empty
+        this.#rdfStore = new RdfStore();
+        this.#relatedResourceIris = [];
         console.debug("viewer created for %s", this.#rootUrl)
     }
 
