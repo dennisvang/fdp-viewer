@@ -1,5 +1,7 @@
 import {ResourceViewer} from "./modules/viewer.js";
 
+// todo: consistent naming IRI/URI/URL throughout all modules
+
 let viewer;
 
 const inputUrl = document.getElementById("input-url");
