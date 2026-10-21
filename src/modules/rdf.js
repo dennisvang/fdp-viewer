@@ -53,12 +53,12 @@ export class RdfStore {
      */
     getRelatedResourceIris(subjectIri) {
         const subject = DataFactory.namedNode(subjectIri);
-        const children = store.getObjects(
+        const children = this.#store.getObjects(
             subject,
             DataFactory.namedNode(DCTERMS_HAS_PART),
             null,
         ).map(c => c.id);
-        const parents = store.getObjects(
+        const parents = this.#store.getObjects(
             subject,
             DataFactory.namedNode(DCTERMS_IS_PART_OF),
             null,
