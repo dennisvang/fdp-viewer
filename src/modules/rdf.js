@@ -135,7 +135,7 @@ export class RdfStore {
         const reasoner = new Reasoner(unionStore);
 
         // copy quads from all graphs into the default graph of the union store
-        store.forEach(quad => {
+        this.#store.forEach(quad => {
             unionStore.addQuad(
                 quad.subject, quad.predicate, quad.object, DataFactory.defaultGraph()
             );
@@ -149,11 +149,14 @@ export class RdfStore {
         // copy relevant quads back into the specified graph in the main triple store
         // todo: improve efficiency if necessary
         const rootGraph = DataFactory.namedNode(rootGraphUri);
-        const rootGraphSubjectIds = store.getSubjects(null, null, rootGraph).map(s => s.id);
-        console.debug("store size before copying inferred quads: " + store.size)
+        const rootGraphSubjectIds = this.#store.getSubjects(null, null, rootGraph)
+            .map(s => s.id);
+        console.debug("store size before copying inferred quads: " + this.#store.size)
         unionStore.forEach(quad => {
             if (rootGraphSubjectIds.includes(quad.subject.id)) {
-                if (store.addQuad(quad.subject, quad.predicate, quad.object, rootGraph)) {
+                const added = this.#store.addQuad(
+                    quad.subject, quad.predicate, quad.object, rootGraph);
+                if (added) {
                     console.debug(
                         "inferred statement: %s, %s, %s",
                         quad.subject.id, quad.predicate.id, quad.object.id
@@ -161,6 +164,6 @@ export class RdfStore {
                 }
             }
         });
-        console.debug("store size after copying inferred quads: " + store.size)
+        console.debug("store size after copying inferred quads: " + this.#store.size)
     }
 }
