@@ -29,8 +29,9 @@ export class ResourceViewer {
         const resourceUrl = url ? url : this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
-        // apply reasoning
-
+        // reason about the harvested triples and add inferred triples to the rdf store
+        // (mainly used to infer navigation relations independently of the LDP statements)
+        this.#rdfStore.reason(resourceUrl);
         // find uris representing related resources, for internal navigation
         this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(resourceUrl);
         console.debug(this.#relatedResourceIris)
