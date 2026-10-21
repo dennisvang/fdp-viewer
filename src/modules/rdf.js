@@ -2,11 +2,37 @@
 // https://rdf.js.org/N3.js/ (docs)
 // https://www.rubensworks.net/blog/2019/10/06/using-rdf-in-javascript/
 
-import { DataFactory, Parser, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
+import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
+
+export const MEDIATYPE_TURTLE = "text/turtle";
 
 const DCTERMS_HAS_PART = "http://purl.org/dc/terms/hasPart";
 const DCTERMS_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
-export const MEDIATYPE_TURTLE = "text/turtle";
+const INFERENCE_RULES = `
+# infer subclass
+{
+  ?subject a ?object .
+  ?object <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?otherObject .
+} => {
+  ?subject a ?otherObject .
+} .
+
+# infer subproperty
+{
+  ?subject ?predicate ?object .
+  ?predicate <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> ?otherPredicate .
+} => {
+  ?subject ?otherPredicate ?object .
+} .
+
+# infer close match property (to handle fdp-o:metadataCatalog...)
+{
+  ?subject ?predicate ?object .
+  ?predicate <http://www.w3.org/2004/02/skos/core#closeMatch> ?otherPredicate .
+} => {
+  ?subject ?otherPredicate ?object .
+} .
+`;
 
 /** Maintains rdf store state */
 export class RdfStore {
@@ -89,5 +115,50 @@ export class RdfStore {
     /** Returns known prefixes (populated via parser) */
     getPrefixes() {
         return this.#prefixes;
+    }
+
+    /**
+     * Applies reasoning to the rdf store, based on the specified
+     *
+     * Note that n3.js does not support reasoning over multiple graphs, so we need to
+     * copy all quads from individual graphs into the default graph of a single new
+     * triple store and reason over that. The resulting triples are then copied back
+     * into the specified root graph in the main triple store.
+     */
+    reason(rootGraphUri) {
+        // initialize reasoning components
+        const rulesParser = new Parser({ format: mediatypeTextN3 });
+        const rulesStore = new Store(rulesParser.parse(INFERENCE_RULES));
+        const unionStore = new Store();
+        const reasoner = new Reasoner(unionStore);
+
+        // copy quads from all graphs into the default graph of the union store
+        store.forEach(quad => {
+            unionStore.addQuad(
+                quad.subject, quad.predicate, quad.object, DataFactory.defaultGraph()
+            );
+        });
+
+        // apply reasoning based on the specified inference rules
+        console.debug("union-store size before reasoning: " + unionStore.size);
+        reasoner.reason(rulesStore);
+        console.debug("union-store size after reasoning: " + unionStore.size);
+
+        // copy relevant quads back into the specified graph in the main triple store
+        // todo: improve efficiency if necessary
+        const rootGraph = DataFactory.namedNode(rootGraphUri);
+        const rootGraphSubjectIds = store.getSubjects(null, null, rootGraph).map(s => s.id);
+        console.debug("store size before copying inferred quads: " + store.size)
+        unionStore.forEach(quad => {
+            if (rootGraphSubjectIds.includes(quad.subject.id)) {
+                if (store.addQuad(quad.subject, quad.predicate, quad.object, rootGraph)) {
+                    console.debug(
+                        "inferred statement: %s, %s, %s",
+                        quad.subject.id, quad.predicate.id, quad.object.id
+                    );
+                }
+            }
+        });
+        console.debug("store size after copying inferred quads: " + store.size)
     }
 }
