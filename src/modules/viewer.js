@@ -29,6 +29,9 @@ export class ResourceViewer {
         const resourceUrl = url ? url : this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
+        // harvest ontologies from prefixes (these are used for reasoning and for
+        // obtaining human readable labels for the predicates)
+        // todo: implement this
         // reason about the harvested triples and add inferred triples to the rdf store
         // (mainly used to infer navigation relations independently of the LDP statements)
         this.#rdfStore.reason(resourceUrl);
