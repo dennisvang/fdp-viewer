@@ -8,6 +8,8 @@ export const MEDIATYPE_TURTLE = "text/turtle";
 
 const DCTERMS_HAS_PART = "http://purl.org/dc/terms/hasPart";
 const DCTERMS_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
+const MEDIATYPE_N3 = "text/n3";
+
 const INFERENCE_RULES = `
 # infer subclass
 {
@@ -127,7 +129,7 @@ export class RdfStore {
      */
     reason(rootGraphUri) {
         // initialize reasoning components
-        const rulesParser = new Parser({ format: mediatypeTextN3 });
+        const rulesParser = new Parser({ format: MEDIATYPE_N3 });
         const rulesStore = new Store(rulesParser.parse(INFERENCE_RULES));
         const unionStore = new Store();
         const reasoner = new Reasoner(unionStore);
