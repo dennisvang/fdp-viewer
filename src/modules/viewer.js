@@ -29,6 +29,11 @@ export class ResourceViewer {
         const resourceUrl = url ? url : this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
+        // apply reasoning
+
+        // find uris representing related resources, for internal navigation
+        this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(resourceUrl);
+        console.debug(this.#relatedResourceIris)
         // populate the content container based on the harvested resource
         await this.#populate(resourceUrl);
     }
