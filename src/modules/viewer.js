@@ -64,7 +64,6 @@ export class ResourceViewer {
         await this.#harvest(resourceUrl);
         // find uris representing related resources, for internal navigation
         this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(resourceUrl);
-        console.debug(this.#relatedResourceIris)
         // populate the content container based on the harvested resource
         await this.#populate(resourceUrl);
     }

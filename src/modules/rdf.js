@@ -73,18 +73,18 @@ export class RdfStore {
             LDP_HASMEMBER_RELATION,
             subject,
         );
-        // there *should* be only one LDP hasMemberRelation per LDP container, but an RDF
-        // document *could* define multiple LDP containers with different
+        // there *should* be only one LDP hasMemberRelation per LDP container, but an
+        // RDF document *could* define multiple LDP containers with different
         // hasMemberRelation objects, so we iterate over (possibly) multiple predicates
+        // todo: again this breaks due to the annoying trailing slash discrepancy
+        //  between base URI and root subject URI...
         const children = [];
         for (const childNavigationPredicate of childNavigationPredicates) {
-            console.info(childNavigationPredicate)
             const childUris = this.#store.getObjects(
                 subject,
                 childNavigationPredicate,
                 null,
             ).map(c => c.id);
-            console.info(childUris)
             children.push(...childUris);
         }
         const parents = this.#store.getObjects(
