@@ -32,14 +32,13 @@ export class ResourceViewer {
         // only same-origin navigation is handled here, which implies an internal
         // resource-url param is available
         event.intercept({
-            async handler() {
+            handler: async () => {
                 // note that, at this point, the location has already changed so it
                 // matches the destination
                 const destinationUrl = new URL(event.destination.url);
                 const resourceUrl = destinationUrl.searchParams.get(PARAM_RESOURCE_URL);
                 console.debug("intercepted navigation to %s", resourceUrl)
-                console.info(this)
-                this.update(resourceUrl);
+                await this.update(resourceUrl);
             }
         });
     }
