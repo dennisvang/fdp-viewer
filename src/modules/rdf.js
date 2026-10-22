@@ -92,7 +92,14 @@ export class RdfStore {
             null,
         ).map(p => p.id);
         // unique array of IRIs from parents and children
-        return [... new Set([...children, ...parents])];
+        let uniqueIris = [... new Set([...children, ...parents])];
+        // ugly workaround for trailing slash mismatch between rdf-subject and root URI
+        if (!uniqueIris.length && subjectIri.endsWith("/")) {
+            console.warn("using workaround for related resource iris")
+            // recursive call without the trailing slash
+            uniqueIris = this.getRelatedResourceIris(subjectIri.slice(0, -1));
+        }
+        return uniqueIris;
     }
 
     /**
