@@ -182,7 +182,8 @@ export class RdfStore {
      * Returns a list of unique URIs based on all named nodes in the store's rootUri
      * graph. Same-origin URIs are excluded based on the specified rootUri.
      * Prefix base URIs are included, but not their individual term URIS. Non-prefix
-     * cross-origin URIs are all included.
+     * cross-origin URIs are all included. This is because we also want to know labels
+     * etc. for URIs that may not have been specified as prefix.
      */
     getUniqueUris(rootUri) {
         // add all prefixes
