@@ -166,4 +166,39 @@ export class RdfStore {
         });
         console.debug("store size after copying inferred quads: " + this.#store.size)
     }
+
+    /**
+     * Returns a list of unique URIs based on all named nodes in the store (except
+     * graph terms). Same-origin URIs are excluded based on the specified rootUri.
+     * Prefix base URIs are included, but not their individual term URIS. Non-prefix
+     * cross-origin URIs are all included.
+     */
+    getUniqueUris(rootUri) {
+        // add all prefixes
+        const prefixUris = Object.values(this.#prefixes);
+        const uniqueUris = new Set(prefixUris);
+        // create a list of origins to skip (same-origin and prefix origins) this is
+        // more robust than using the whole URI because it ignores the hash and path
+        const excludedOrigins = [];
+        for (const uri of [rootUri, ...prefixUris]) {
+            const origin = new URL(uri).origin;
+            excludedOrigins.push(origin);
+        }
+        // iterate over all terms in the store
+        for (const quad of this.#store) {
+            // check all quad terms except graph
+            for (const termName of ["subject", "predicate", "object"]) {
+                const term = quad[termName];
+                // only consider named nodes and exclude same-origin (not interested)
+                // and prefix origins (already present)
+                if (term.termType === "NamedNode" && !excludedOrigins.includes(new URL(term.id).origin)) {
+                    // remove any fragments
+                    const termUrl = new URL(term.id);
+                    termUrl.hash = "";
+                    uniqueUris.add(termUrl.href);
+                }
+            }
+        }
+        return [...uniqueUris];
+    }
 }
