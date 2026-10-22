@@ -175,8 +175,8 @@ export class RdfStore {
     }
 
     /**
-     * Returns a list of unique URIs based on all named nodes in the store (except
-     * graph terms). Same-origin URIs are excluded based on the specified rootUri.
+     * Returns a list of unique URIs based on all named nodes in the store's rootUri
+     * graph. Same-origin URIs are excluded based on the specified rootUri.
      * Prefix base URIs are included, but not their individual term URIS. Non-prefix
      * cross-origin URIs are all included.
      */
@@ -191,8 +191,8 @@ export class RdfStore {
             const origin = new URL(uri).origin;
             excludedOrigins.push(origin);
         }
-        // iterate over all terms in the store
-        for (const quad of this.#store) {
+        // iterate over all terms in the root graph store
+        for (const quad of this.#store.match(null, null, null, rootUri)) {
             // check all quad terms except graph
             for (const termName of ["subject", "predicate", "object"]) {
                 const term = quad[termName];
