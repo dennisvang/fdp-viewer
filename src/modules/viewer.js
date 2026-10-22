@@ -21,10 +21,30 @@ export class ResourceViewer {
         // initialize empty
         this.#rdfStore = new RdfStore();
         this.#relatedResourceIris = [];
+        // intercept navigation events
+        navigation.addEventListener("navigate", this.#navigationHandler.bind(this));
         console.debug("viewer created for %s", this.#rootUrl)
     }
 
-    /** (WIP) */
+    /** Handles navigation events using the JavaScript navigation API */
+    #navigationHandler(event) {
+        console.debug("nav event detected: %s, %s", event.navigationType, event.destination.url)
+        // only same-origin navigation is handled here, which implies an internal
+        // resource-url param is available
+        event.intercept({
+            async handler() {
+                // note that, at this point, the location has already changed so it
+                // matches the destination
+                const destinationUrl = new URL(event.destination.url);
+                const resourceUrl = destinationUrl.searchParams.get(PARAM_RESOURCE_URL);
+                console.debug("intercepted navigation to %s", resourceUrl)
+                console.info(this)
+                this.update(resourceUrl);
+            }
+        });
+    }
+
+    /** Updates the whole content based on the specified url */
     async update(url) {
         // fall back on root url if no url was provided
         const resourceUrl = url ? url : this.#rootUrl;
