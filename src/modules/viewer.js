@@ -85,18 +85,28 @@ export class ResourceViewer {
      * Creates a clickable HTML element for an IRI. Human readable link text is obtained
      * from RDF statements if available. Known prefixes are substituted in the element
      * title which appears on mouse-hover, for improved readability.
-     * The labelIri argument is used if the link text and title should be different
-     * from the actual navigationIri.
+     * Automatically distinguishes between cross-origin and same-origin IRIs.
      */
-    #createElementIRI(navigationIri, labelIri, ...classes) {
-        // label falls back on navigation iri
-        labelIri = labelIri || navigationIri;
+    #createElementIRI(iri, ...classes) {
+        const labelIri = iri;
+        let navigationIri = iri;
+        let navigationTarget = "_blank";
+        // handle same-origin navigation
+        if (this.#relatedResourceIris.includes(iri)) {
+            // highlight the element via css class
+            classes.push(CLASS_RELATED_RESOURCE);
+            // convert href for same-origin navigation with the term.id as url param
+            const location = new URL(window.location);
+            location.searchParams.set(PARAM_RESOURCE_URL, iri);
+            navigationIri = location.href;
+            navigationTarget = "_self";
+        }
+        // create element
         const iriElement = document.createElement("a");
         iriElement.href = navigationIri;
         iriElement.textContent = this.#getLabel(labelIri);
         iriElement.title = this.#withPrefixes(labelIri);
-        // open in new tab
-        iriElement.target = "_blank";
+        iriElement.target = navigationTarget;
         if (classes && classes.length) {
             iriElement.classList.add(classes);
         }
@@ -121,18 +131,7 @@ export class ResourceViewer {
             termElement.textContent = this.#withPrefixes(term.id);
         } else {
             const elementClasses = [];
-            const labelIri = term.id;
-            let navigationIri = term.id;
-            // adapt href and class for same-origin navigation if the term represents
-            // a related resource
-            if (this.#relatedResourceIris.includes(term.id)) {
-                elementClasses.push(CLASS_RELATED_RESOURCE);
-                // convert href for same-origin navigation with the term.id as url param
-                const location = new URL(window.location);
-                location.searchParams.set(PARAM_RESOURCE_URL, term.id);
-                navigationIri = location.href;
-            }
-            termElement = this.#createElementIRI(navigationIri, labelIri, ...elementClasses);
+            termElement = this.#createElementIRI(term.id, ...elementClasses);
         }
         termElement.classList.add("rdf-term");
         return termElement;
