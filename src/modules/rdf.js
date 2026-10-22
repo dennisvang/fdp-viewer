@@ -2,39 +2,12 @@
 // https://rdf.js.org/N3.js/ (docs)
 // https://www.rubensworks.net/blog/2019/10/06/using-rdf-in-javascript/
 
-import { DataFactory, Parser, Reasoner, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
+import { DataFactory, Parser, Store } from "https://unpkg.com/n3/browser/n3.esm.min.js";
 
 export const MEDIATYPE_TURTLE = "text/turtle";
 
-const DCTERMS_HAS_PART = "http://purl.org/dc/terms/hasPart";
 const DCTERMS_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
-const MEDIATYPE_N3 = "text/n3";
-
-const INFERENCE_RULES = `
-# infer subclass
-{
-  ?subject a ?object .
-  ?object <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?otherObject .
-} => {
-  ?subject a ?otherObject .
-} .
-
-# infer subproperty
-{
-  ?subject ?predicate ?object .
-  ?predicate <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> ?otherPredicate .
-} => {
-  ?subject ?otherPredicate ?object .
-} .
-
-# infer close match property (to handle fdp-o:metadataCatalog...)
-{
-  ?subject ?predicate ?object .
-  ?predicate <http://www.w3.org/2004/02/skos/core#closeMatch> ?otherPredicate .
-} => {
-  ?subject ?otherPredicate ?object .
-} .
-`;
+const LDP_HASMEMBER_RELATION = "http://www.w3.org/ns/ldp#hasMemberRelation"
 
 // map known prefix URIs to URLs that can be resolved from a browser (w.r.t. CORS, XML, etc.)
 const KNOWN_PREFIX_MAP = {
@@ -143,58 +116,11 @@ export class RdfStore {
     }
 
     /**
-     * Applies reasoning to the rdf store, based on the specified
-     *
-     * Note that n3.js does not support reasoning over multiple graphs, so we need to
-     * copy all quads from individual graphs into the default graph of a single new
-     * triple store and reason over that. The resulting triples are then copied back
-     * into the specified root graph in the main triple store.
-     */
-    reason(rootGraphUri) {
-        // initialize reasoning components
-        const rulesParser = new Parser({ format: MEDIATYPE_N3 });
-        const rulesStore = new Store(rulesParser.parse(INFERENCE_RULES));
-        const unionStore = new Store();
-        const reasoner = new Reasoner(unionStore);
-
-        // copy quads from all graphs into the default graph of the union store
-        this.#store.forEach(quad => {
-            unionStore.addQuad(
-                quad.subject, quad.predicate, quad.object, DataFactory.defaultGraph()
-            );
-        });
-
-        // apply reasoning based on the specified inference rules
-        console.debug("union-store size before reasoning: " + unionStore.size);
-        reasoner.reason(rulesStore);
-        console.debug("union-store size after reasoning: " + unionStore.size);
-
-        // copy relevant quads back into the specified graph in the main triple store
-        // todo: improve efficiency if necessary
-        const rootGraph = DataFactory.namedNode(rootGraphUri);
-        const rootGraphSubjectIds = this.#store.getSubjects(null, null, rootGraph)
-            .map(s => s.id);
-        console.debug("store size before copying inferred quads: " + this.#store.size)
-        unionStore.forEach(quad => {
-            if (rootGraphSubjectIds.includes(quad.subject.id)) {
-                const added = this.#store.addQuad(
-                    quad.subject, quad.predicate, quad.object, rootGraph);
-                if (added) {
-                    console.debug(
-                        "inferred statement: %s, %s, %s",
-                        quad.subject.id, quad.predicate.id, quad.object.id
-                    );
-                }
-            }
-        });
-        console.debug("store size after copying inferred quads: " + this.#store.size)
-    }
-
-    /**
-     * Returns an array of resolvable prefix URLs for important namespace URIs.
-     * This is a workaround for the fact that some namespace URIs cannot be resolved
-     * from a browser due to CORS restrictions, and some are only available in XML,
-     * which cannot be parsed by n3.js.
+     * Returns a list of unique URIs based on all named nodes in the store's rootUri
+     * graph. Same-origin URIs are excluded based on the specified rootUri.
+     * Prefix base URIs are included, but not their individual term URIS. Non-prefix
+     * cross-origin URIs are all included. This is because we also want to know labels
+     * etc. for URIs that may not have been specified as prefix.
      */
     getKnownPrefixUrls() {
         const resolvableUrls = [];
