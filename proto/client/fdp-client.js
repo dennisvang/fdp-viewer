@@ -131,7 +131,7 @@ function clearFdp(container) {
     // remove all triples from the store
     store.removeMatches(null, null, null, null);
     // remove all html elements from the container
-    container.innerHTML = "";
+    container.replaceChildren();
 }
 
 /**
