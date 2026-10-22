@@ -23,7 +23,7 @@ export class ResourceViewer {
         this.#relatedResourceIris = [];
         // intercept navigation events
         navigation.addEventListener("navigate", this.#navigationHandler.bind(this));
-        console.debug("viewer created for %s", this.#rootUrl)
+        console.info("viewer created for %s", this.#rootUrl)
     }
 
     /** Handles navigation events using the JavaScript navigation API */
@@ -204,8 +204,11 @@ export class ResourceViewer {
      * identified by the resource url.
      */
     async #harvest(url) {
+        if (this.#rdfStore.graphExists(url)) {
+            console.debug("skipping %s because it has already been harvested", url)
+            return;
+        }
         const turtle = await this.#requestTurtle(url);
-        // todo: only call parseTurtle if the url is not in the rdf store yet
         await this.#rdfStore.parseTurtle(turtle, url);
     }
 

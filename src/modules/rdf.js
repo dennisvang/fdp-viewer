@@ -53,9 +53,8 @@ export class RdfStore {
     async parseTurtle(turtle, uri) {
         // use a dedicated graph for each parsed uri
         const graph = uri ? DataFactory.namedNode(uri) : DataFactory.defaultGraph();
-        // note that the use of parse() callbacks makes this asynchronous,
-        // but we need them so we can recurse when finding a prefix)
         const turtleParser = new Parser({ format: MEDIATYPE_TURTLE });
+        // note that the use of parse() with options/callbacks makes this asynchronous
         turtleParser.parse(turtle, {
             onQuad: (error, quad) => {
                 if (quad) {
@@ -100,6 +99,11 @@ export class RdfStore {
             uniqueIris = this.getRelatedResourceIris(subjectIri.slice(0, -1));
         }
         return uniqueIris;
+    }
+
+    /** Returns true if the specified graph exists */
+    graphExists(graphUri) {
+        return this.#store.has(null, null, null, DataFactory.namedNode(graphUri));
     }
 
     /**
