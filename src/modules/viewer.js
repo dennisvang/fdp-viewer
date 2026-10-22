@@ -199,29 +199,21 @@ export class ResourceViewer {
     }
 
     /** Maps a URI to another as workaround for CORS and XML issues.
-     * - HTTP redirects and CORS may prevent download, we so use the final url instead
-     *   (may still fail if CORS header ‘Access-Control-Allow-Origin’ is missing)
+     * - HTTP redirects and CORS prevent download via purl, so use the final url instead
      * - Some ontologies are only available in xml, which n3 cannot parse, so use custom
      * TODO: Replace by a proper fix. For example, CORS issues could be prevented by
      *  providing a proxy endpoint, and a remote service could parse XML and convert it
      *  to ttl.
      */
     #mappedUri(uri) {
-        let mappedUri = uri;
         const workaroundMap = {
             "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
             "https://w3id.org/fdp/fdp-o": "ontologies/fdp-o.ttl",
         };
-        if (uri in workaroundMap) {
-            mappedUri = workaroundMap[uri];
-        } else if (uri.includes("://semanticscience.org")) {
-            const url = new URL("https://ontobee.org/ontology/SIO");
-            url.searchParams.set("iri", uri);
-            mappedUri = url.href;
+        const mappedUri = workaroundMap[uri];
+        if (mappedUri) {
+            console.warn("using workaround to map %s to %s", uri, mappedUri)
         }
-        if (mappedUri !== uri) {
-            console.warn("using workaround: mapped %s to %s", uri, mappedUri)
-        }
-        return mappedUri;
+        return mappedUri || uri;
     }
 }
