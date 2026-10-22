@@ -61,17 +61,35 @@ export class RdfStore {
 
     /**
      * Returns an array of IRIs representing parents and children of the specified
-     * RDF subject.
+     * RDF subject. These represent navigation links.
      */
     getRelatedResourceIris(subjectIri) {
         const subject = DataFactory.namedNode(subjectIri);
-        const children = this.#store.getObjects(
-            subject,
-            DataFactory.namedNode(DCTERMS_HAS_PART),
+        // use the LDP statements to figure out which predicate links to children
+        // (this relation is not defined on the subject itself, but on an LDP container
+        // which is part of the graph identified by the current subject...)
+        const childNavigationPredicates = this.#store.getObjects(
             null,
-        ).map(c => c.id);
+            LDP_HASMEMBER_RELATION,
+            subject,
+        );
+        // there *should* be only one LDP hasMemberRelation per LDP container, but an RDF
+        // document *could* define multiple LDP containers with different
+        // hasMemberRelation objects, so we iterate over (possibly) multiple predicates
+        const children = [];
+        for (const childNavigationPredicate of childNavigationPredicates) {
+            console.info(childNavigationPredicate)
+            const childUris = this.#store.getObjects(
+                subject,
+                childNavigationPredicate,
+                null,
+            ).map(c => c.id);
+            console.info(childUris)
+            children.push(...childUris);
+        }
         const parents = this.#store.getObjects(
             subject,
+            // LDP does not provide a way to specify the parent relation, so use dcterms
             DataFactory.namedNode(DCTERMS_IS_PART_OF),
             null,
         ).map(p => p.id);
