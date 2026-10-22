@@ -63,7 +63,15 @@ export class ResourceViewer {
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
         // find uris representing related resources, for internal navigation
-        this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(resourceUrl);
+        // (the multiple subject IRIs are part of an ugly workaround for possible root
+        // trailing slash discrepancy)
+        let subjectIris = [resourceUrl];
+        const rootUrl = new URL(this.#rootUrl)
+        if (resourceUrl === this.#rootUrl && ["", "/"].includes(rootUrl.pathname)) {
+            console.info("using crappy trailing slash workaround...")
+            subjectIris = [rootUrl.origin, rootUrl.origin + "/"];
+        }
+        this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(subjectIris);
         // populate the content container based on the harvested resource
         await this.#populate(resourceUrl);
     }

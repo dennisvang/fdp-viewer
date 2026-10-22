@@ -63,45 +63,49 @@ export class RdfStore {
      * Returns an array of IRIs representing parents and children of the specified
      * RDF subject. These represent navigation links.
      */
-    getRelatedResourceIris(subjectIri) {
-        const subject = DataFactory.namedNode(subjectIri);
-        // use the LDP statements to figure out which predicate links to children
-        // (this relation is not defined on the subject itself, but on an LDP container
-        // which is part of the graph identified by the current subject...)
-        const childNavigationPredicates = this.#store.getObjects(
-            null,
-            LDP_HASMEMBER_RELATION,
-            subject,
-        );
-        // there *should* be only one LDP hasMemberRelation per LDP container, but an
-        // RDF document *could* define multiple LDP containers with different
-        // hasMemberRelation objects, so we iterate over (possibly) multiple predicates
-        // todo: again this breaks due to the annoying trailing slash discrepancy
-        //  between base URI and root subject URI...
-        const children = [];
-        for (const childNavigationPredicate of childNavigationPredicates) {
-            const childUris = this.#store.getObjects(
-                subject,
-                childNavigationPredicate,
+    getRelatedResourceIris(subjectIris) {
+        // as a workaround for the possible trailing slash discrepancy between root
+        // subject URI and base URI, we need to consider multiple URIs...
+        // however, ideally we would only have to consider a single subject URI
+        const childNavigationPredicates = [];
+        for (const subjectIri of subjectIris) {
+            // use the LDP statements to figure out which predicate links to children
+            // (this relation is not defined on the subject itself, but on an LDP
+            // container which is part of the graph identified by the current subject)
+            childNavigationPredicates.push(...this.#store.getObjects(
                 null,
-            ).map(c => c.id);
-            children.push(...childUris);
+                LDP_HASMEMBER_RELATION,
+                DataFactory.namedNode(subjectIri),
+            ));
         }
-        const parents = this.#store.getObjects(
-            subject,
-            // LDP does not provide a way to specify the parent relation, so use dcterms
-            DataFactory.namedNode(DCTERMS_IS_PART_OF),
-            null,
-        ).map(p => p.id);
+        // again the workaround for possible root trailing slash discrepancy
+        const children = [];
+        for (const subjectIri of subjectIris) {
+            // there *should* be only one LDP hasMemberRelation per LDP container, but an
+            // RDF document *could* define multiple LDP containers with different
+            // hasMemberRelation objects, so we iterate over (possibly) multiple predicates
+            for (const childNavigationPredicate of childNavigationPredicates) {
+                const childUris = this.#store.getObjects(
+                    DataFactory.namedNode(subjectIri),
+                    childNavigationPredicate,
+                    null,
+                ).map(c => c.id);
+                children.push(...childUris);
+            }
+        }
+        // again the workaround for possible root trailing slash discrepancy
+        const parents = [];
+        for (const subjectIri of subjectIris) {
+            parents.push(...this.#store.getObjects(
+                DataFactory.namedNode(subjectIri),
+                // LDP does not provide a way to specify the parent relation, so use dcterms
+                DataFactory.namedNode(DCTERMS_IS_PART_OF),
+                null,
+            ).map(p => p.id));
+        }
+        console.info(parents)
         // unique array of IRIs from parents and children
-        let uniqueIris = [... new Set([...children, ...parents])];
-        // ugly workaround for trailing slash mismatch between rdf-subject and root URI
-        if (!uniqueIris.length && subjectIri.endsWith("/")) {
-            console.warn("using workaround for related resource iris")
-            // recursive call without the trailing slash
-            uniqueIris = this.getRelatedResourceIris(subjectIri.slice(0, -1));
-        }
-        return uniqueIris;
+        return [... new Set([...children, ...parents])];
     }
 
     /** Returns true if the specified graph exists */
