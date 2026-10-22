@@ -46,7 +46,7 @@ export class ResourceViewer {
     /** Updates the whole content based on the specified url */
     async update(url) {
         // fall back on root url if no url was provided
-        const resourceUrl = url ? url : this.#rootUrl;
+        const resourceUrl = url || this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
         // harvest statements from all the term URIs found in the store (to prepare for

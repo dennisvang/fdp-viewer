@@ -373,7 +373,7 @@ async function makeRequest(url, options) {
     // (see https://github.com/fdp-specs/fdp-specs.github.io/issues/35 for details)
     let finalUrl = url;
     if (url in corsMap) {
-        finalUrl = corsMap[url].url ? corsMap[url].url : url;
+        finalUrl = corsMap[url].url || url;
         console.warn(`using cors workaround for ${url} (${finalUrl})`);
         if (corsMap[url].accept) {
             options.headers.accept = corsMap[url].accept;

@@ -71,7 +71,7 @@ async function parseFromUrl(url) {
 async function makeRequest(url, accept) {
     const options = {
         method: "GET",
-        headers: {"accept": accept ? accept : "text/turtle"},
+        headers: {"accept": accept || "text/turtle"},
     };
 
     // enforce https
