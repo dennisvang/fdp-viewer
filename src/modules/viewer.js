@@ -38,7 +38,7 @@ export class ResourceViewer {
                 const destinationUrl = new URL(event.destination.url);
                 const navigationUrl = destinationUrl.searchParams.get(PARAM_NAVIGATION_URL);
                 console.debug("intercepted navigation to %s", navigationUrl)
-                await this.update(navigationUrl);
+                await this.#update(navigationUrl);
             }
         });
     }
@@ -46,18 +46,27 @@ export class ResourceViewer {
     /**
      * Harvests RDF-turtle from known ontologies/vocabularies to provide context for
      * reasoning, human readable labels, and so on.
+     * Then navigates to the root URL to populate the page.
      */
     async initialize() {
+        // harvest known ontologies
         for (const url of this.#rdfStore.getKnownPrefixUrls()) {
             console.info("initializing %s", url)
             await this.#harvest(url)
                 .catch(reason => console.warn("%s failed: %s", url, reason));
             console.info("%s initialized", url)
         }
+        // clear existing navigation history
+
+        // navigate to root URL, using history "replace" to prevent the user from
+        // going back to any previous root URL (from different FDP)
+        const destinationUrl = new URL(window.location);
+        destinationUrl.searchParams.set(PARAM_NAVIGATION_URL, this.#rootUrl);
+        navigation.navigate(destinationUrl, {"history": "replace"});
     }
 
     /** Updates the whole content based on the specified url */
-    async update(url) {
+    async #update(url) {
         // fall back on root url if no url was provided
         const resourceUrl = url || this.#rootUrl;
         // harvest resource statements and add them to the rdf store

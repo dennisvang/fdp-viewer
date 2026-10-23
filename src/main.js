@@ -10,10 +10,8 @@ const inputUrl = document.getElementById("input-url");
 inputUrl.addEventListener("change", async (event) => {
     const container = document.getElementById("content");
     viewer = new ResourceViewer(container, event.target.value);
-    // initialize rdf context
+    // initialize rdf context and populate page
     await viewer.initialize();
-    // populate page from root url
-    await viewer.update();
 });
 
 // initialize
