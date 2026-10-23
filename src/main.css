@@ -9,6 +9,10 @@ body {
     font-size: 10pt;
 }
 
+.nav-resource {
+    color: coral;
+}
+
 .rdf-statement {
     display: flex;
     flex-wrap: wrap;
@@ -22,10 +26,6 @@ body {
 .rdf-predicate {
     color: darkgray;
     font-style: italic;
-}
-
-.related-resource {
-    color: coral;
 }
 
 .subject {

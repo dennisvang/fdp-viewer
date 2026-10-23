@@ -1,7 +1,7 @@
 import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
 
 const CLASS_RDF_STATEMENT = "rdf-statement";
-const CLASS_RELATED_RESOURCE = "related-resource";
+const CLASS_NAVIGATION_RESOURCE = "nav-resource";
 const CLASS_SUBJECT = "subject";
 const CLASS_SUBJECT_TITLE = "subject-title";
 const CLASS_TITLE = "title";
@@ -62,7 +62,7 @@ export class ResourceViewer {
         const resourceUrl = url || this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
-        // find uris representing related resources, for internal navigation
+        // find uris representing navigation resources, for internal navigation
         // (the multiple subject IRIs are part of an ugly workaround for possible root
         // trailing slash discrepancy)
         let subjectIris = [resourceUrl];
@@ -121,7 +121,7 @@ export class ResourceViewer {
         // handle same-origin navigation
         if (this.#relatedResourceIris.includes(iri)) {
             // highlight the element via css class
-            classes.push(CLASS_RELATED_RESOURCE);
+            classes.push(CLASS_NAVIGATION_RESOURCE);
             // convert href for same-origin navigation with the term.id as url param
             const location = new URL(window.location);
             location.searchParams.set(PARAM_NAVIGATION_URL, iri);
