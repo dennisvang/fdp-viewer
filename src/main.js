@@ -9,11 +9,10 @@ const inputUrl = document.getElementById("input-url");
 // create new viewer when fdp url changes
 inputUrl.addEventListener("change", async (event) => {
     const container = document.getElementById("content");
+    // todo: validate url and/or allow domain entry (without the scheme://)
     viewer = new ResourceViewer(container, event.target.value);
-    // initialize rdf context
+    // initialize rdf context and populate page
     await viewer.initialize();
-    // populate page from root url
-    await viewer.update();
 });
 
 // initialize
