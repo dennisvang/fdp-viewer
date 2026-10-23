@@ -43,21 +43,25 @@ export class ResourceViewer {
         });
     }
 
+    /**
+     * Harvests RDF-turtle from known ontologies/vocabularies to provide context for
+     * reasoning, human readable labels, and so on.
+     */
+    async initialize() {
+        for (const url of this.#rdfStore.getKnownPrefixUrls()) {
+            console.info("initializing %s", url)
+            await this.#harvest(url)
+                .catch(reason => console.warn("%s failed: %s", url, reason));
+            console.info("%s initialized", url)
+        }
+    }
+
     /** Updates the whole content based on the specified url */
     async update(url) {
         // fall back on root url if no url was provided
         const resourceUrl = url || this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
-        // harvest statements from all the term URIs found in the store (to prepare for
-        // reasoning and to determine human readable labels)
-        // todo: optimize for efficiency (if necessary)
-        for (const termUri of this.#rdfStore.getUniqueUris(this.#rootUrl)) {
-            console.debug("harvesting %s", termUri)
-            await this.#harvest(this.#mappedUri(termUri)).catch((reason) => {
-                console.warn("failed to harvest %s\n(due to %s)", termUri, reason)
-            });
-        }
         // reason about the harvested triples and add inferred triples to the rdf store
         // (mainly used to infer navigation relations independently of the LDP statements)
         this.#rdfStore.reason(resourceUrl);
@@ -229,24 +233,5 @@ export class ResourceViewer {
         }
         console.debug("got success response from %s", url);
         return await response.text();
-    }
-
-    /** Maps a URI to another as workaround for CORS and XML issues.
-     * - HTTP redirects and CORS prevent download via purl, so use the final url instead
-     * - Some ontologies are only available in xml, which n3 cannot parse, so use custom
-     * TODO: Replace by a proper fix. For example, CORS issues could be prevented by
-     *  providing a proxy endpoint, and a remote service could parse XML and convert it
-     *  to ttl.
-     */
-    #mappedUri(uri) {
-        const workaroundMap = {
-            "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
-            "https://w3id.org/fdp/fdp-o": "ontologies/fdp-o.ttl",
-        };
-        const mappedUri = workaroundMap[uri];
-        if (mappedUri) {
-            console.warn("using workaround to map %s to %s", uri, mappedUri)
-        }
-        return mappedUri || uri;
     }
 }
