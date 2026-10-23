@@ -37,14 +37,14 @@ const INFERENCE_RULES = `
 `;
 
 // map known prefix URIs to URLs that can be resolved from a browser (w.r.t. CORS, XML, etc.)
-export const RDF_PREFIX_MAP = {
+const KNOWN_PREFIX_MAP = {
     "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#": null,  // works as is
     "http://www.w3.org/2000/01/rdf-schema#": null,  // works as is
-    "http://www.w3.org/2001/XMLSchema#": null,  // fails: CORS header missing and only available as XML
+    // "http://www.w3.org/2001/XMLSchema#": null,  // fails: CORS header missing and only available as XML
     "http://www.w3.org/ns/dcat#": null,  // works as is
     "http://www.w3.org/ns/ldp#": null,  // works as is
-    "http://xmlns.com/foaf/0.1/": null,  // fails: only available as XML
+    // "http://xmlns.com/foaf/0.1/": null,  // fails: only available as XML
     "https://w3id.org/fdp/fdp-o#": "ontologies/fdp-o.ttl",  // only available as XML
 };
 
@@ -191,38 +191,16 @@ export class RdfStore {
     }
 
     /**
-     * Returns a list of unique URIs based on all named nodes in the store's rootUri
-     * graph. Same-origin URIs are excluded based on the specified rootUri.
-     * Prefix base URIs are included, but not their individual term URIS. Non-prefix
-     * cross-origin URIs are all included. This is because we also want to know labels
-     * etc. for URIs that may not have been specified as prefix.
+     * Returns an array of resolvable prefix URLs for important namespace URIs.
+     * This is a workaround for the fact that some namespace URIs cannot be resolved
+     * from a browser due to CORS restrictions, and some are only available in XML,
+     * which cannot be parsed by n3.js.
      */
-    getUniqueUris(rootUri) {
-        // add all prefixes
-        const prefixUris = Object.values(this.#prefixes);
-        const uniqueUris = new Set(prefixUris);
-        // create a list of origins to skip (same-origin and prefix origins) this is
-        // more robust than using the whole URI because it ignores the hash and path
-        const excludedOrigins = [];
-        for (const uri of [rootUri, ...prefixUris]) {
-            const origin = new URL(uri).origin;
-            excludedOrigins.push(origin);
+    getKnownPrefixUrls() {
+        const resolvableUrls = [];
+        for (const [prefixUri, resolvableUrl] of Object.entries(KNOWN_PREFIX_MAP)) {
+            resolvableUrls.push(resolvableUrl || prefixUri);
         }
-        // iterate over all terms in the root graph store
-        for (const quad of this.#store.match(null, null, null, rootUri)) {
-            // check all quad terms except graph
-            for (const termName of ["subject", "predicate", "object"]) {
-                const term = quad[termName];
-                // only consider named nodes and exclude same-origin (not interested)
-                // and prefix origins (already present)
-                if (term.termType === "NamedNode" && !excludedOrigins.includes(new URL(term.id).origin)) {
-                    // remove any fragments
-                    const termUrl = new URL(term.id);
-                    termUrl.hash = "";
-                    uniqueUris.add(termUrl.href);
-                }
-            }
-        }
-        return [...uniqueUris];
+        return resolvableUrls;
     }
 }

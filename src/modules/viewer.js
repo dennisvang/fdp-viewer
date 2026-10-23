@@ -1,4 +1,4 @@
-import { MEDIATYPE_TURTLE, RDF_PREFIX_MAP, RdfStore } from "./rdf.js";
+import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
 
 const CLASS_RDF_STATEMENT = "rdf-statement";
 const CLASS_RELATED_RESOURCE = "related-resource";
@@ -48,12 +48,11 @@ export class ResourceViewer {
      * reasoning, human readable labels, and so on.
      */
     async initialize() {
-        for (const [prefixUri, resolvableUrl] of Object.entries(RDF_PREFIX_MAP)) {
-            const url = resolvableUrl || prefixUri;
-            console.info("initializing %s via %s", prefixUri, url)
-            this.#harvest(url)
-                .catch(reason => console.warn("%s failed: %s", prefixUri, reason))
-                .then(() => {console.info("%s initialized", prefixUri)});
+        for (const url of this.#rdfStore.getKnownPrefixUrls()) {
+            console.info("initializing %s", url)
+            await this.#harvest(url)
+                .catch(reason => console.warn("%s failed: %s", url, reason));
+            console.info("%s initialized", url)
         }
     }
 
@@ -234,24 +233,5 @@ export class ResourceViewer {
         }
         console.debug("got success response from %s", url);
         return await response.text();
-    }
-
-    /** Maps a URI to another as workaround for CORS and XML issues.
-     * - HTTP redirects and CORS prevent download via purl, so use the final url instead
-     * - Some ontologies are only available in xml, which n3 cannot parse, so use custom
-     * TODO: Replace by a proper fix. For example, CORS issues could be prevented by
-     *  providing a proxy endpoint, and a remote service could parse XML and convert it
-     *  to ttl.
-     */
-    #mappedUri(uri) {
-        const workaroundMap = {
-            "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
-            "https://w3id.org/fdp/fdp-o": "ontologies/fdp-o.ttl",
-        };
-        const mappedUri = workaroundMap[uri];
-        if (mappedUri) {
-            console.warn("using workaround to map %s to %s", uri, mappedUri)
-        }
-        return mappedUri || uri;
     }
 }
