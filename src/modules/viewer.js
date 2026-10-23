@@ -5,7 +5,7 @@ const CLASS_RELATED_RESOURCE = "related-resource";
 const CLASS_SUBJECT = "subject";
 const CLASS_SUBJECT_TITLE = "subject-title";
 const CLASS_TITLE = "title";
-const PARAM_RESOURCE_URL = "resource-url";
+const PARAM_NAVIGATION_URL = "nav-url";
 
 /** Maintains resource viewer state */
 export class ResourceViewer {
@@ -30,15 +30,15 @@ export class ResourceViewer {
     #navigationHandler(event) {
         console.debug("nav event detected: %s, %s", event.navigationType, event.destination.url)
         // only same-origin navigation is handled here, which implies an internal
-        // resource-url param is available
+        // nav-url parameter is available
         event.intercept({
             handler: async () => {
                 // note that, at this point, the location has already changed so it
                 // matches the destination
                 const destinationUrl = new URL(event.destination.url);
-                const resourceUrl = destinationUrl.searchParams.get(PARAM_RESOURCE_URL);
-                console.debug("intercepted navigation to %s", resourceUrl)
-                await this.update(resourceUrl);
+                const navigationUrl = destinationUrl.searchParams.get(PARAM_NAVIGATION_URL);
+                console.debug("intercepted navigation to %s", navigationUrl)
+                await this.update(navigationUrl);
             }
         });
     }
@@ -124,7 +124,7 @@ export class ResourceViewer {
             classes.push(CLASS_RELATED_RESOURCE);
             // convert href for same-origin navigation with the term.id as url param
             const location = new URL(window.location);
-            location.searchParams.set(PARAM_RESOURCE_URL, iri);
+            location.searchParams.set(PARAM_NAVIGATION_URL, iri);
             navigationIri = location.href;
             navigationTarget = "_self";
         }
