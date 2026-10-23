@@ -62,12 +62,16 @@ export class ResourceViewer {
         const resourceUrl = url || this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
-        // reason about the harvested triples and add inferred triples to the rdf store
-        // (mainly used to infer navigation relations independently of the LDP statements)
-        this.#rdfStore.reason(resourceUrl);
         // find uris representing related resources, for internal navigation
-        this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(resourceUrl);
-        console.debug(this.#relatedResourceIris)
+        // (the multiple subject IRIs are part of an ugly workaround for possible root
+        // trailing slash discrepancy)
+        let subjectIris = [resourceUrl];
+        const rootUrl = new URL(this.#rootUrl)
+        if (resourceUrl === this.#rootUrl && ["", "/"].includes(rootUrl.pathname)) {
+            console.info("using crappy trailing slash workaround...")
+            subjectIris = [rootUrl.origin, rootUrl.origin + "/"];
+        }
+        this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(subjectIris);
         // populate the content container based on the harvested resource
         await this.#populate(resourceUrl);
     }
