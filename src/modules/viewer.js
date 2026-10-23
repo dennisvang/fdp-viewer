@@ -1,4 +1,4 @@
-import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
+import { MEDIATYPE_TURTLE, RDF_PREFIX_MAP, RdfStore } from "./rdf.js";
 
 const CLASS_RDF_STATEMENT = "rdf-statement";
 const CLASS_RELATED_RESOURCE = "related-resource";
@@ -43,21 +43,26 @@ export class ResourceViewer {
         });
     }
 
+    /**
+     * Harvests RDF-turtle from known ontologies/vocabularies to provide context for
+     * reasoning, human readable labels, and so on.
+     */
+    async initialize() {
+        for (const [prefixUri, resolvableUrl] of Object.entries(RDF_PREFIX_MAP)) {
+            const url = resolvableUrl || prefixUri;
+            console.info("initializing %s via %s", prefixUri, url)
+            this.#harvest(url)
+                .catch(reason => console.warn("%s failed: %s", prefixUri, reason))
+                .then(() => {console.info("%s initialized", prefixUri)});
+        }
+    }
+
     /** Updates the whole content based on the specified url */
     async update(url) {
         // fall back on root url if no url was provided
         const resourceUrl = url || this.#rootUrl;
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
-        // harvest statements from all the term URIs found in the store (to prepare for
-        // reasoning and to determine human readable labels)
-        // todo: optimize for efficiency (if necessary)
-        for (const termUri of this.#rdfStore.getUniqueUris(this.#rootUrl)) {
-            console.debug("harvesting %s", termUri)
-            await this.#harvest(this.#mappedUri(termUri)).catch((reason) => {
-                console.warn("failed to harvest %s\n(due to %s)", termUri, reason)
-            });
-        }
         // reason about the harvested triples and add inferred triples to the rdf store
         // (mainly used to infer navigation relations independently of the LDP statements)
         this.#rdfStore.reason(resourceUrl);
