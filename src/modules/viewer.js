@@ -72,17 +72,35 @@ export class ResourceViewer {
         // harvest resource statements and add them to the rdf store
         await this.#harvest(resourceUrl);
         // find uris representing navigation resources, for internal navigation
-        // (the multiple subject IRIs are part of an ugly workaround for possible root
-        // trailing slash discrepancy)
-        let subjectIris = [resourceUrl];
-        const rootUrl = new URL(this.#rootUrl)
-        if (resourceUrl === this.#rootUrl && ["", "/"].includes(rootUrl.pathname)) {
-            console.info("using crappy trailing slash workaround...")
-            subjectIris = [rootUrl.origin, rootUrl.origin + "/"];
-        }
+        const subjectIris = this.#workaroundPossibleSubjectIris(resourceUrl);
         this.#relatedResourceIris = this.#rdfStore.getRelatedResourceIris(subjectIris);
         // populate the content container based on the harvested resource
         await this.#populate(resourceUrl);
+    }
+
+    /**
+     * Returns an array of possible RDF subject IRIs based on the specified resourceUrl.
+     * This is an ugly workaround for possible mismatch between scheme and path of the
+     * HTTP request URL and the RDF subject URI.
+     */
+    #workaroundPossibleSubjectIris(resourceUrl) {
+        console.info("using subject URI workaround...")
+        let subjectIris = [resourceUrl];
+        const rootPaths = ["", "/"];
+        const url = new URL(resourceUrl);
+        // only do this for the root (i.e. no path "" or empty path "/")
+        if (rootPaths.includes(url.pathname)) {
+            subjectIris = [];
+            // create all combinations of scheme and root path
+            ["http", "https"].forEach(scheme => {
+                rootPaths.forEach(path => {
+                    url.protocol = scheme;
+                    subjectIris.push(url.origin + path);
+                });
+            });
+        }
+        console.info(subjectIris)
+        return subjectIris
     }
 
     /** Replaces IRIs with corresponding prefixes */
