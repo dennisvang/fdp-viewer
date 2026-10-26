@@ -86,9 +86,9 @@ export class ResourceViewer {
     #workaroundPossibleSubjectIris(resourceUrl) {
         console.info("using subject URI workaround...")
         let subjectIris = [resourceUrl];
-        const rootPaths = ["", "/"];
         const url = new URL(resourceUrl);
-        // only do this for the root (i.e. no path "" or empty path "/")
+        // the workaround only applies to the root (i.e. no path "" or empty path "/")
+        const rootPaths = ["", "/"];
         if (rootPaths.includes(url.pathname)) {
             subjectIris = [];
             // create all combinations of scheme and root path
