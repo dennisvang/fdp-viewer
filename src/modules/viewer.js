@@ -253,7 +253,7 @@ export class ResourceViewer {
         // clear
         this.#container.replaceChildren();
         // show prefixes
-        this.#createElementForPrefixes();
+        this.#container.appendChild(this.#createElementForPrefixes());
         // iterate over all rdf subjects from the graph for the specified resource url
         this.#rdfStore.getSubjectsForGraph(url).forEach(subject => {
             this.#container.appendChild(this.#createElementForSubject(url, subject));
