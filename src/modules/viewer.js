@@ -226,12 +226,16 @@ export class ResourceViewer {
         return subjectElement;
     }
 
-    /** Creates an HTML element for a single prefix */
+    /** Creates an HTML element for a prefix that triggers harvesting on click */
     #createElementForPrefix(prefix, uri) {
-        const prefixElement = document.createElement("a");
+        const prefixElement = document.createElement("div");
         prefixElement.classList.add(CLASS_PREFIX);
-        prefixElement.href = uri;
         prefixElement.textContent = prefix;
+        prefixElement.addEventListener("click", event => {
+            this.#harvest(uri)
+                .then(() => event.target.classList.add(CLASS_PREFIX_HARVESTED))
+                .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
+        });
         return prefixElement;
     }
 
