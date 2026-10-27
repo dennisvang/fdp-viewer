@@ -1,5 +1,6 @@
 import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
 
+const CLASS_CLICKABLE = "clickable";
 const CLASS_RDF_STATEMENT = "rdf-statement";
 const CLASS_RDF_TERM = "rdf-term";
 const CLASS_NAVIGATION_RESOURCE = "nav-resource";
@@ -223,11 +224,20 @@ export class ResourceViewer {
         prefixElement.classList.add(CLASS_PREFIX);
         prefixElement.textContent = prefix;
         prefixElement.title = uri;
-        prefixElement.addEventListener("click", event => {
-            this.#harvest(uri)
-                .then(() => event.target.classList.add(CLASS_PREFIX_HARVESTED))
-                .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
-        });
+        if (this.#rdfStore.graphExists(uri)) {
+            prefixElement.classList.add(CLASS_PREFIX_HARVESTED);
+        } else {
+            prefixElement.classList.add(CLASS_CLICKABLE);
+            prefixElement.addEventListener("click", event => {
+                this.#harvest(uri)
+                    .then(() => {
+                        event.target.classList.add(CLASS_PREFIX_HARVESTED);
+                        event.target.classList.remove(CLASS_CLICKABLE);
+                        // todo: remove listener?
+                    })
+                    .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
+            });
+        }
         return prefixElement;
     }
 

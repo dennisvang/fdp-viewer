@@ -9,12 +9,12 @@ body {
     font-size: 10pt;
 }
 
-.nav-resource {
-    color: coral;
+.clickable {
+    cursor: pointer;
 }
 
-.prefix {
-    cursor: pointer;
+.nav-resource {
+    color: coral;
 }
 
 .prefix-failed {
