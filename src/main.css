@@ -19,7 +19,7 @@ body {
     margin: 0.25em;
 }
 
-.rdf-term {
+.rdf-term, .prefix {
     margin: 0.25em;
 }
 
@@ -28,7 +28,7 @@ body {
     font-style: italic;
 }
 
-.subject {
+.subject, .prefixes {
     color: white;
     padding: 0.5em;
     background-color: darkblue;
