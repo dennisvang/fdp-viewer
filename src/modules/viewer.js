@@ -4,6 +4,9 @@ const CLASS_RDF_STATEMENT = "rdf-statement";
 const CLASS_RDF_TERM = "rdf-term";
 const CLASS_NAVIGATION_RESOURCE = "nav-resource";
 const CLASS_PREFIX = "prefix";
+const CLASS_PREFIX_FAILED = "prefix-failed";
+const CLASS_PREFIX_HARVESTED = "prefix-harvested";
+const CLASS_PREFIX_LIST = "prefix-list";
 const CLASS_PREFIXES = "prefixes";
 const CLASS_SUBJECT = "subject";
 const CLASS_SUBJECT_TITLE = "subject-title";
@@ -240,14 +243,18 @@ export class ResourceViewer {
         titleElement.classList.add(CLASS_TITLE);
         titleElement.textContent = "Prefixes";
         prefixesElement.appendChild(titleElement);
-        // sort prefixes before appending them
+        // sort prefixes
         const prefixEntries = Object.entries(this.#rdfStore.getPrefixes());
         prefixEntries.sort((a, b) => a[0].localeCompare(b[0]));
+        // add prefixes to list element (for flex layout)
+        const prefixListElement = document.createElement("div");
+        prefixListElement.classList.add(CLASS_PREFIX_LIST);
         for (const [prefix, uri] of prefixEntries) {
             if (prefix) {
-                prefixesElement.appendChild(this.#createElementForPrefix(prefix, uri));
+                prefixListElement.appendChild(this.#createElementForPrefix(prefix, uri));
             }
         }
+        prefixesElement.appendChild(prefixListElement);
         return prefixesElement;
     }
 

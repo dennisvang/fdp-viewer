@@ -13,7 +13,7 @@ body {
     color: coral;
 }
 
-.rdf-statement {
+.rdf-statement, .prefix-list {
     display: flex;
     flex-wrap: wrap;
     margin: 0.25em;
