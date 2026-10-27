@@ -55,15 +55,6 @@ export class ResourceViewer {
      * Then navigates to the root URL to populate the page.
      */
     async initialize() {
-        // harvest known ontologies
-        for (const url of this.#rdfStore.getKnownPrefixUrls()) {
-            console.info("initializing %s", url)
-            await this.#harvest(url)
-                .catch(reason => console.warn("%s failed: %s", url, reason));
-            console.info("%s initialized", url)
-        }
-        // clear existing navigation history
-
         // navigate to root URL, using history "replace" to prevent the user from
         // going back to any previous root URL (from different FDP)
         const destinationUrl = new URL(window.location);
