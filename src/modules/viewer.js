@@ -239,8 +239,13 @@ export class ResourceViewer {
         titleElement.classList.add(CLASS_TITLE);
         titleElement.textContent = "Prefixes";
         prefixesElement.appendChild(titleElement);
-        for (const prefixEntry of Object.entries(this.#rdfStore.getPrefixes())) {
-            prefixesElement.appendChild(this.#createElementForPrefix(...prefixEntry));
+        // sort prefixes before appending them
+        const prefixEntries = Object.entries(this.#rdfStore.getPrefixes());
+        prefixEntries.sort((a, b) => a[0].localeCompare(b[0]));
+        for (const [prefix, uri] of prefixEntries) {
+            if (prefix) {
+                prefixesElement.appendChild(this.#createElementForPrefix(prefix, uri));
+            }
         }
         return prefixesElement;
     }
