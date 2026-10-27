@@ -222,6 +222,7 @@ export class ResourceViewer {
         const prefixElement = document.createElement("div");
         prefixElement.classList.add(CLASS_PREFIX);
         prefixElement.textContent = prefix;
+        prefixElement.title = uri;
         prefixElement.addEventListener("click", event => {
             this.#harvest(uri)
                 .then(() => event.target.classList.add(CLASS_PREFIX_HARVESTED))
