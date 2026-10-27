@@ -231,9 +231,8 @@ export class ResourceViewer {
             prefixElement.addEventListener("click", event => {
                 this.#harvest(uri)
                     .then(() => {
-                        event.target.classList.add(CLASS_PREFIX_HARVESTED);
-                        event.target.classList.remove(CLASS_CLICKABLE);
-                        // todo: remove listener?
+                        this.#update(window.location.search[PARAM_NAVIGATION_URL])
+                            .then(result => console.debug("updated prefix: " + result));
                     })
                     .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
             });
