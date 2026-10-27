@@ -232,7 +232,7 @@ export class ResourceViewer {
                 this.#harvest(uri)
                     .then(() => {
                         this.#update(window.location.search[PARAM_NAVIGATION_URL])
-                            .then(result => console.debug("updated prefix: " + result));
+                            .then(() => console.debug("updated prefix " + prefix));
                     })
                     .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
             });
