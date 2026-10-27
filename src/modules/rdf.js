@@ -144,6 +144,7 @@ export class RdfStore {
      * cross-origin URIs are all included. This is because we also want to know labels
      * etc. for URIs that may not have been specified as prefix.
      */
+    // todo: remove or reimplement for prefix-on-demand
     getKnownPrefixUrls() {
         const resolvableUrls = [];
         for (const [prefixUri, resolvableUrl] of Object.entries(KNOWN_PREFIX_MAP)) {
