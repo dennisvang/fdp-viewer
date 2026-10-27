@@ -13,6 +13,14 @@ body {
     color: coral;
 }
 
+.prefix-failed {
+    color: deeppink;
+}
+
+.prefix-harvested {
+    color: springgreen;
+}
+
 .rdf-statement, .prefix-list {
     display: flex;
     flex-wrap: wrap;
