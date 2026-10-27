@@ -2,6 +2,8 @@ import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
 
 const CLASS_RDF_STATEMENT = "rdf-statement";
 const CLASS_NAVIGATION_RESOURCE = "nav-resource";
+const CLASS_PREFIX = "prefix";
+const CLASS_PREFIXES = "prefixes";
 const CLASS_SUBJECT = "subject";
 const CLASS_SUBJECT_TITLE = "subject-title";
 const CLASS_TITLE = "title";
@@ -220,6 +222,20 @@ export class ResourceViewer {
         return subjectElement;
     }
 
+
+    /** Creates an HTML element that contains links for all the prefixes */
+    #createElementForPrefixes() {
+        const prefixesElement = document.createElement("div");
+        prefixesElement.classList.add(CLASS_PREFIXES);
+        const titleElement = document.createElement("div");
+        titleElement.classList.add(CLASS_TITLE);
+        prefixesElement.appendChild(titleElement);
+        for (const prefixEntry of Object.entries(this.#rdfStore.getPrefixes())) {
+            prefixesElement.appendChild(this.#createElementForPrefix(prefixEntry));
+        }
+        return prefixesElement;
+    }
+
     /**
      * Populates the content container based on statements from the RDF store about
      * the specified resource. The container is cleared first.
@@ -227,6 +243,8 @@ export class ResourceViewer {
     async #populate(url) {
         // clear
         this.#container.replaceChildren();
+        // show prefixes
+        this.#createElementForPrefixes();
         // iterate over all rdf subjects from the graph for the specified resource url
         this.#rdfStore.getSubjectsForGraph(url).forEach(subject => {
             this.#container.appendChild(this.#createElementForSubject(url, subject));
