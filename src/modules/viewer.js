@@ -1,6 +1,7 @@
 import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
 
 const CLASS_RDF_STATEMENT = "rdf-statement";
+const CLASS_RDF_TERM = "rdf-term";
 const CLASS_NAVIGATION_RESOURCE = "nav-resource";
 const CLASS_PREFIX = "prefix";
 const CLASS_PREFIXES = "prefixes";
@@ -189,7 +190,7 @@ export class ResourceViewer {
             const elementClasses = [];
             termElement = this.#createElementIRI(term.id, ...elementClasses);
         }
-        termElement.classList.add("rdf-term");
+        termElement.classList.add(CLASS_RDF_TERM);
         return termElement;
     }
 
