@@ -222,6 +222,14 @@ export class ResourceViewer {
         return subjectElement;
     }
 
+    /** Creates an HTML element for a single prefix */
+    #createElementForPrefix(prefix, uri) {
+        const prefixElement = document.createElement("a");
+        prefixElement.classList.add(CLASS_PREFIX);
+        prefixElement.href = uri;
+        prefixElement.textContent = prefix;
+        return prefixElement;
+    }
 
     /** Creates an HTML element that contains links for all the prefixes */
     #createElementForPrefixes() {
@@ -229,9 +237,10 @@ export class ResourceViewer {
         prefixesElement.classList.add(CLASS_PREFIXES);
         const titleElement = document.createElement("div");
         titleElement.classList.add(CLASS_TITLE);
+        titleElement.textContent = "Prefixes";
         prefixesElement.appendChild(titleElement);
         for (const prefixEntry of Object.entries(this.#rdfStore.getPrefixes())) {
-            prefixesElement.appendChild(this.#createElementForPrefix(prefixEntry));
+            prefixesElement.appendChild(this.#createElementForPrefix(...prefixEntry));
         }
         return prefixesElement;
     }
