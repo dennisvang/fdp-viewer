@@ -288,8 +288,9 @@ export class ResourceViewer {
             console.debug("skipping %s because it has already been harvested", url)
             return;
         }
-        // todo: use known prefix urls...
-        const turtle = await this.#requestTurtle(url);
+        // workaround: if the url represents a known prefix it is replaced to prevent
+        // CORS and/or XML parsing issues
+        const turtle = await this.#requestTurtle(this.#rdfStore.workaroundPrefixUri(url));
         await this.#rdfStore.parseTurtle(turtle, url);
     }
 

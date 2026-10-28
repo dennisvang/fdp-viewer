@@ -138,18 +138,14 @@ export class RdfStore {
     }
 
     /**
-     * Returns a list of unique URIs based on all named nodes in the store's rootUri
-     * graph. Same-origin URIs are excluded based on the specified rootUri.
-     * Prefix base URIs are included, but not their individual term URIS. Non-prefix
-     * cross-origin URIs are all included. This is because we also want to know labels
-     * etc. for URIs that may not have been specified as prefix.
+     * Returns a prefix URI that resolves to a turtle document, if available. Otherwise
+     * just returns the input URI. This is a crappy workaround for the fact that many
+     * ontologies are not properly configured for CORS and some are only available in
+     * XML, which cannot be parsed by our n3.js.
      */
-    // todo: remove or reimplement for prefix-on-demand
-    getKnownPrefixUrls() {
-        const resolvableUrls = [];
-        for (const [prefixUri, resolvableUrl] of Object.entries(KNOWN_PREFIX_MAP)) {
-            resolvableUrls.push(resolvableUrl || prefixUri);
-        }
-        return resolvableUrls;
+    workaroundPrefixUri(uri) {
+        const workaroundUri = KNOWN_PREFIX_MAP[uri] || uri;
+        if (workaroundUri !== uri) console.info("using prefix workaround for " + uri);
+        return workaroundUri;
     }
 }
