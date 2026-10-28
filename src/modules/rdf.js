@@ -38,26 +38,28 @@ export class RdfStore {
      * graph uri. Also updates the #prefixes object.
      */
     async parseTurtle(turtle, uri) {
-        // use a dedicated graph for each parsed uri
-        const graph = uri ? DataFactory.namedNode(uri) : DataFactory.defaultGraph();
-        const turtleParser = new Parser({ format: MEDIATYPE_TURTLE });
-        // note that the use of parse() with options/callbacks makes this asynchronous
-        turtleParser.parse(turtle, {
-            onQuad: (error, quad) => {
-                if (quad) {
+        // return a promise so we can handle parsing errors properly
+        return new Promise((resolve, reject) => {
+            // use a dedicated graph for each parsed uri
+            const graph = uri ? DataFactory.namedNode(uri) : DataFactory.defaultGraph();
+            const turtleParser = new Parser({ format: MEDIATYPE_TURTLE });
+            turtleParser.parse(turtle, (error, quad, prefixes) => {
+                if (error) {
+                    console.debug("failed to parse quad for %s:\n%s", uri, error);
+                    reject(error);
+                } else if (quad) {
                     const newQuad = DataFactory.quad(
                         quad.subject, quad.predicate, quad.object, graph
                     );
                     this.#store.add(newQuad);
                     console.debug("added to store: %s (graph: %s)", newQuad.subject.id, newQuad.graph.id);
+                } else {
+                    console.debug("done parsing %s", uri);
+                    // update the class attribute
+                    Object.assign(this.#prefixes, prefixes);
+                    resolve();
                 }
-                if (error) {
-                    console.warn("failed to parse quad for %s:\n%s", uri, error);
-                }
-            },
-            onPrefix: (prefix, iri) => {
-                this.#prefixes[prefix] = iri.id;
-            },
+            });
         });
     }
 
