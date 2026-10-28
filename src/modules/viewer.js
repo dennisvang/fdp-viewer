@@ -228,14 +228,7 @@ export class ResourceViewer {
             prefixElement.classList.add(CLASS_PREFIX_HARVESTED);
         } else {
             prefixElement.classList.add(CLASS_CLICKABLE);
-            prefixElement.addEventListener("click", event => {
-                this.#harvest(uri)
-                    .then(() => {
-                        this.#update(window.location.search[PARAM_NAVIGATION_URL])
-                            .then(() => console.debug("updated prefix " + prefix));
-                    })
-                    .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
-            });
+            prefixElement.addEventListener("click", this.#prefixCallback.bind(this));
         }
         return prefixElement;
     }
@@ -311,5 +304,18 @@ export class ResourceViewer {
         }
         console.debug("got success response from %s", url);
         return await response.text();
+    }
+
+    /** Triggers harvesting of the specified prefix URI */
+    #prefixCallback(event) {
+        // should we check that the event.target has prefix class?
+        const prefix = event.target.textContent;
+        const prefixUri = event.target.title;
+        this.#harvest(prefixUri)
+            .then(() => {
+                this.#update(window.location.search[PARAM_NAVIGATION_URL])
+                    .then(() => console.debug("updated prefix " + prefix));
+            })
+            .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
     }
 }
