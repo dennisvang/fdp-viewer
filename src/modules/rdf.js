@@ -8,6 +8,7 @@ export const MEDIATYPE_TURTLE = "text/turtle";
 
 const DCTERMS_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
 const LDP_HASMEMBER_RELATION = "http://www.w3.org/ns/ldp#hasMemberRelation"
+const PREFIX_URI_FDPO = "https://w3id.org/fdp/fdp-o#";
 
 // map known prefix URIs to URLs that can be resolved from a browser (w.r.t. CORS, XML, etc.)
 const KNOWN_PREFIX_MAP = {
@@ -18,7 +19,7 @@ const KNOWN_PREFIX_MAP = {
     "http://www.w3.org/ns/dcat#": null,  // works as is
     "http://www.w3.org/ns/ldp#": null,  // works as is
     // "http://xmlns.com/foaf/0.1/": null,  // fails: only available as XML
-    "https://w3id.org/fdp/fdp-o#": "ontologies/fdp-o.ttl",  // only available as XML
+    [PREFIX_URI_FDPO]: "ontologies/fdp-o.ttl",  // only available as XML so use custom ttl
 };
 
 /** Maintains rdf store state */
@@ -27,7 +28,8 @@ export class RdfStore {
     #store;
 
     constructor() {
-        this.#prefixes = {};
+        // always add the fdp-o prefix
+        this.#prefixes = {"fdp-o": PREFIX_URI_FDPO};
         this.#store = new Store();
     }
 
