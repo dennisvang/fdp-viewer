@@ -8,6 +8,7 @@ export const MEDIATYPE_TURTLE = "text/turtle";
 
 const DCTERMS_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
 const LDP_HASMEMBER_RELATION = "http://www.w3.org/ns/ldp#hasMemberRelation"
+const PREFIX_URI_FDPO = "https://w3id.org/fdp/fdp-o#";
 
 // map known prefix URIs to URLs that can be resolved from a browser (w.r.t. CORS, XML, etc.)
 const KNOWN_PREFIX_MAP = {
@@ -18,7 +19,7 @@ const KNOWN_PREFIX_MAP = {
     "http://www.w3.org/ns/dcat#": null,  // works as is
     "http://www.w3.org/ns/ldp#": null,  // works as is
     // "http://xmlns.com/foaf/0.1/": null,  // fails: only available as XML
-    "https://w3id.org/fdp/fdp-o#": "ontologies/fdp-o.ttl",  // only available as XML
+    [PREFIX_URI_FDPO]: "ontologies/fdp-o.ttl",  // only available as XML so use custom ttl
 };
 
 /** Maintains rdf store state */
@@ -27,7 +28,8 @@ export class RdfStore {
     #store;
 
     constructor() {
-        this.#prefixes = {};
+        // always add the fdp-o prefix
+        this.#prefixes = {"fdp-o": PREFIX_URI_FDPO};
         this.#store = new Store();
     }
 
@@ -138,17 +140,14 @@ export class RdfStore {
     }
 
     /**
-     * Returns a list of unique URIs based on all named nodes in the store's rootUri
-     * graph. Same-origin URIs are excluded based on the specified rootUri.
-     * Prefix base URIs are included, but not their individual term URIS. Non-prefix
-     * cross-origin URIs are all included. This is because we also want to know labels
-     * etc. for URIs that may not have been specified as prefix.
+     * Returns a prefix URI that resolves to a turtle document, if available. Otherwise
+     * just returns the input URI. This is a crappy workaround for the fact that many
+     * ontologies are not properly configured for CORS and some are only available in
+     * XML, which cannot be parsed by our n3.js.
      */
-    getKnownPrefixUrls() {
-        const resolvableUrls = [];
-        for (const [prefixUri, resolvableUrl] of Object.entries(KNOWN_PREFIX_MAP)) {
-            resolvableUrls.push(resolvableUrl || prefixUri);
-        }
-        return resolvableUrls;
+    workaroundPrefixUri(uri) {
+        const workaroundUri = KNOWN_PREFIX_MAP[uri] || uri;
+        if (workaroundUri !== uri) console.info("using prefix workaround for " + uri);
+        return workaroundUri;
     }
 }

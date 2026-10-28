@@ -1,7 +1,14 @@
 import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
 
+const CLASS_CLICKABLE = "clickable";
 const CLASS_RDF_STATEMENT = "rdf-statement";
+const CLASS_RDF_TERM = "rdf-term";
 const CLASS_NAVIGATION_RESOURCE = "nav-resource";
+const CLASS_PREFIX = "prefix";
+const CLASS_PREFIX_FAILED = "prefix-failed";
+const CLASS_PREFIX_HARVESTED = "prefix-harvested";
+const CLASS_PREFIX_LIST = "prefix-list";
+const CLASS_PREFIXES = "prefixes";
 const CLASS_SUBJECT = "subject";
 const CLASS_SUBJECT_TITLE = "subject-title";
 const CLASS_TITLE = "title";
@@ -49,15 +56,6 @@ export class ResourceViewer {
      * Then navigates to the root URL to populate the page.
      */
     async initialize() {
-        // harvest known ontologies
-        for (const url of this.#rdfStore.getKnownPrefixUrls()) {
-            console.info("initializing %s", url)
-            await this.#harvest(url)
-                .catch(reason => console.warn("%s failed: %s", url, reason));
-            console.info("%s initialized", url)
-        }
-        // clear existing navigation history
-
         // navigate to root URL, using history "replace" to prevent the user from
         // going back to any previous root URL (from different FDP)
         const destinationUrl = new URL(window.location);
@@ -187,7 +185,7 @@ export class ResourceViewer {
             const elementClasses = [];
             termElement = this.#createElementIRI(term.id, ...elementClasses);
         }
-        termElement.classList.add("rdf-term");
+        termElement.classList.add(CLASS_RDF_TERM);
         return termElement;
     }
 
@@ -220,6 +218,51 @@ export class ResourceViewer {
         return subjectElement;
     }
 
+    /** Creates an HTML element for a prefix that triggers harvesting on click */
+    #createElementForPrefix(prefix, uri) {
+        const prefixElement = document.createElement("div");
+        prefixElement.classList.add(CLASS_PREFIX);
+        prefixElement.textContent = prefix;
+        prefixElement.title = uri;
+        if (this.#rdfStore.graphExists(uri)) {
+            prefixElement.classList.add(CLASS_PREFIX_HARVESTED);
+        } else {
+            prefixElement.classList.add(CLASS_CLICKABLE);
+            prefixElement.addEventListener("click", event => {
+                this.#harvest(uri)
+                    .then(() => {
+                        this.#update(window.location.search[PARAM_NAVIGATION_URL])
+                            .then(() => console.debug("updated prefix " + prefix));
+                    })
+                    .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
+            });
+        }
+        return prefixElement;
+    }
+
+    /** Creates an HTML element that contains links for all the prefixes */
+    #createElementForPrefixes() {
+        const prefixesElement = document.createElement("div");
+        prefixesElement.classList.add(CLASS_PREFIXES);
+        const titleElement = document.createElement("div");
+        titleElement.classList.add(CLASS_TITLE);
+        titleElement.textContent = "Prefixes";
+        prefixesElement.appendChild(titleElement);
+        // sort prefixes
+        const prefixEntries = Object.entries(this.#rdfStore.getPrefixes());
+        prefixEntries.sort((a, b) => a[0].localeCompare(b[0]));
+        // add prefixes to list element (for flex layout)
+        const prefixListElement = document.createElement("div");
+        prefixListElement.classList.add(CLASS_PREFIX_LIST);
+        for (const [prefix, uri] of prefixEntries) {
+            if (prefix) {
+                prefixListElement.appendChild(this.#createElementForPrefix(prefix, uri));
+            }
+        }
+        prefixesElement.appendChild(prefixListElement);
+        return prefixesElement;
+    }
+
     /**
      * Populates the content container based on statements from the RDF store about
      * the specified resource. The container is cleared first.
@@ -227,6 +270,8 @@ export class ResourceViewer {
     async #populate(url) {
         // clear
         this.#container.replaceChildren();
+        // show prefixes
+        this.#container.appendChild(this.#createElementForPrefixes());
         // iterate over all rdf subjects from the graph for the specified resource url
         this.#rdfStore.getSubjectsForGraph(url).forEach(subject => {
             this.#container.appendChild(this.#createElementForSubject(url, subject));
@@ -243,7 +288,9 @@ export class ResourceViewer {
             console.debug("skipping %s because it has already been harvested", url)
             return;
         }
-        const turtle = await this.#requestTurtle(url);
+        // workaround: if the url represents a known prefix it is replaced to prevent
+        // CORS and/or XML parsing issues
+        const turtle = await this.#requestTurtle(this.#rdfStore.workaroundPrefixUri(url));
         await this.#rdfStore.parseTurtle(turtle, url);
     }
 
