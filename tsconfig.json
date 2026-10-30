@@ -13,6 +13,8 @@
     "lib": ["esnext", "dom", "dom.iterable"],
     // no node types because we target browser only
     "types": [],
+    // allow js files (todo: disable when migration to ts is complete)
+    "allowJs": true,
 
     // Other Outputs
     "sourceMap": true,
