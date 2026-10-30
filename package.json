@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "esbuild src/main.js --outdir=dist --bundle --minify --sourcemap --target=esnext"
+    "build": "node build.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2"
