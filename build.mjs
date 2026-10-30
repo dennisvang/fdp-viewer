@@ -1,4 +1,5 @@
 // https://esbuild.github.io/getting-started/#build-scripts
+// this build script should be used via `npm run build` (see package.json scripts)
 
 import * as esbuild from 'esbuild'
 
